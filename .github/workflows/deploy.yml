@@ -13,4 +13,5 @@ jobs:
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
           TARGET: ${{ secrets.SSH_TARGET }}
+          SCRIPT_BEFORE: ls
           SCRIPT_AFTER: ${{ secrets.RESTART_BIN }}
