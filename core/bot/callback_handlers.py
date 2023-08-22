@@ -24,6 +24,9 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if not bot.bot_map.tile_at(new_cords[0], new_cords[1]).value.walkable:
             await query.answer()
             return
+        if User.get_by_coordinates(new_cords[0], new_cords[1]) is not None:
+            await query.answer()
+            return
         user.x, user.y = new_cords[0], new_cords[1]
         if not user.update():
             await query.answer(bot.string(user.language, "unkown_error"))
