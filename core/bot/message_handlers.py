@@ -1,7 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from random import randint
-from io import BytesIO
 
 from core.db.user import User
 from core.bot import markups
@@ -17,27 +16,24 @@ def set_message_handlers(bot: "SolarDriveBot"):
             await message.reply(bot.string("English", "unkown_error"))
             return
         map_image = bot.map_renderer.DrawMap(bot.bot_map, draw_rover=False)
-        with BytesIO() as buffer:
-            map_image.save(buffer, format="PNG")
-            buffer.seek(0)
+        with bot.map_renderer.get_image_data(map_image) as image_data:
             await bot.client.send_document(
                 caption=bot.string(user.language, "current_map_seed", seed=bot.map_seed),
                 chat_id=message.chat.id,
-                document=types.InputFile(buffer, filename="current_map.png"),
+                document=types.InputFile(image_data, filename="current_map.png"),
                 reply_to_message_id=message.message_id
             )
+            
 
     @bot.dp.message_handler(commands=["random_map"])
     async def cmd_random_map(message: types.Message):
         seed = randint(0, 999999999)
         random_map = bot.map_generator.BuildMap(seed, bot.map_size, bot.map_size)
         map_img = bot.map_renderer.DrawMap(random_map, draw_rover=False)
-        with BytesIO() as buffer:
-            map_img.save(buffer, format="PNG")
-            buffer.seek(0)
+        with bot.map_renderer.get_image_data(map_img) as image_data: 
             await bot.client.send_document(
                 chat_id=message.chat.id,
-                document=types.InputFile(buffer, filename=f"map_{seed}.png"),
+                document=types.InputFile(image_data, filename=f"map_{seed}.png"),
                 reply_to_message_id=message.message_id
             )
     
@@ -47,19 +43,12 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user is None:
             await message.reply(bot.string("English", "unkown_error"))
             return
-        section_image = bot.map_renderer.DrawMapSubsection(
-            bot.bot_map,
-            [user.x, user.y],
-            bot.section_size,
-            bot.section_size
-        )
-        with BytesIO() as buffer:
-            section_image.save(buffer, format="PNG")
-            buffer.seek(0)
+        section_image = bot.user_subsection(user)
+        with bot.map_renderer.get_image_data(section_image) as image_data:
             await bot.client.send_photo(
-                caption=f"X: *{user.x}* Y: *{user.y}*\n{bot.string(user.language, 'energy')}: *{user.energy}%*",
+                caption=bot.user_controller_info(user),
                 chat_id=message.chat.id,
-                photo=types.InputFile(buffer, filename=f"{user.x}x{user.y}.png"),
+                photo=types.InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
                 reply_markup=markups.rover_controller(),
                 parse_mode="Markdown"
             )

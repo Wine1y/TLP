@@ -1,4 +1,5 @@
 from abc import ABC
+from io import IOBase, BytesIO
 from PIL import Image, ImageDraw
 from typing import List
 from os import getenv, path
@@ -54,6 +55,12 @@ class MapRenderer(ABC):
         if end_y >= bot_map.height:
             end_y -= bot_map.height
         return [start_x, start_y, end_x+1, end_y+1]
+    
+    def get_image_data(self, image: Image.Image, img_format: str="PNG") -> IOBase:
+        buffer = BytesIO()
+        image.save(buffer, img_format)
+        buffer.seek(0)
+        return buffer
 
     
 class StaticRenderer(MapRenderer):

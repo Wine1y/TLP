@@ -1,4 +1,3 @@
-from io import BytesIO
 from aiogram.types import CallbackQuery, InputMediaPhoto, InputFile
 from typing import Dict
 
@@ -29,20 +28,13 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if not user.update():
             await query.answer(bot.string(user.language, "unkown_error"))
             return
-        section_image = bot.map_renderer.DrawMapSubsection(
-            bot.bot_map,
-            [user.x, user.y],
-            bot.section_size,
-            bot.section_size
-        )
-        with BytesIO() as buffer:
-            section_image.save(buffer, format="PNG")
-            buffer.seek(0)
+        section_image = bot.user_subsection(user)
+        with bot.map_renderer.get_image_data(section_image) as image_data:
             await query.message.edit_media(
                 InputMediaPhoto(
-                	InputFile(buffer, filename=f"{user.x}x{user.y}.png"),
-                	caption=f"X: *{user.x}* Y: *{user.y}*\n{bot.string(user.language, 'energy')}: *{user.energy}%*",
-                	parse_mode="Markdown"
+                    InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
+                    caption=bot.user_controller_info(user),
+                    parse_mode="Markdown"
                 ),
                 reply_markup=markups.rover_controller()
             )

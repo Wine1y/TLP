@@ -1,6 +1,5 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from io import BytesIO
 
 from core.db.user import User
 from core.bot import markups
@@ -68,19 +67,12 @@ def set_state_handlers(bot: "SolarDriveBot"):
             )
             return
         await state.finish()
-        section_image = bot.map_renderer.DrawMapSubsection(
-            bot.bot_map,
-            [new_user.x, new_user.y],
-            bot.section_size,
-            bot.section_size
-        )
-        with BytesIO() as buffer:
-            section_image.save(buffer, format="PNG")
-            buffer.seek(0)
+        section_image = bot.user_subsection(new_user)
+        with bot.map_renderer.get_image_data(section_image) as image_data:
             await bot.client.send_photo(
-                caption=f"X: *{new_user.x}* Y: *{new_user.y}*\n{bot.string(new_user.language, 'energy')}: *{new_user.energy}%*",
+                caption=bot.user_controller_info(new_user),
                 chat_id=message.chat.id,
-                photo=types.InputFile(buffer, filename=f"{new_user.x}x{new_user.y}.png"),
+                photo=types.InputFile(image_data, filename=f"{new_user.x}x{new_user.y}.png"),
                 reply_markup=markups.rover_controller(),
                 parse_mode="Markdown"
             )

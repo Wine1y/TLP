@@ -19,7 +19,7 @@ class BotLanguage():
         if string is None:
             raise LocalizationError(f"Localization '{self.name}' doesn't have a '{string_id}' string")
         for key, value in values.items():
-            string = string.replace(f"%{key}%", value)
+            string = string.replace(f"%{key}%", str(value))
         return string
 
 def load_languages(languages_dir: str) -> Dict[str, BotLanguage]:
