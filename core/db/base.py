@@ -1,21 +1,12 @@
-from sqlalchemy import create_engine, Column, Integer, TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import  Column, Integer, TIMESTAMP
 from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError
+from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from os import getenv
 
-try:
-    DB_PATH = getenv("DATABASE_URL")
-    if DB_PATH.startswith("postgres://"):
-        DB_PATH = DB_PATH.replace("postgres://", "postgresql://")
-    ENGINE = create_engine(DB_PATH)
-except AttributeError:
-    raise RuntimeError("Can't connect to database! Check db_path!")
+from core.db import get_session
+
 BASE = declarative_base()
 
-def get_session():
-    return scoped_session(sessionmaker(bind=ENGINE, expire_on_commit=False))
 
 class BaseModel(BASE):
     __abstract__ = True
