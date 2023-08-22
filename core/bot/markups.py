@@ -44,3 +44,13 @@ def nickname_markup(nickname: str) -> ReplyKeyboardMarkup:
         KeyboardButton(nickname)
     )
     return markup
+
+def sqd_msg_markup(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("sqd_button_text"),
+            callback_data=CB_WIP.new()
+        )
+    )
+    return markup

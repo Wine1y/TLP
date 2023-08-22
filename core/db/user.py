@@ -9,9 +9,10 @@ class User(BaseModel):
     username = Column(String, nullable=False, unique=True)
     language = Column(String, nullable=False)
     tg_id = Column(Integer, nullable=False, unique=True)
+    sqd_msg_id = Column(Integer, nullable=True)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
-    energy = Column(Integer())
+    energy = Column(Integer)
 
     def __init__(
         self,
@@ -25,6 +26,7 @@ class User(BaseModel):
         super().__init__()
         self.username = username
         self.tg_id = tg_id
+        self.sqd_msg_id=None
         self.language = language
         self.x = x
         self.y = y

@@ -45,7 +45,7 @@ def set_state_handlers(bot: "SolarDriveBot"):
             return
         existing_user = User.get_by_tg_id(message.from_id)
         new_user = None
-        if existing_user:
+        if existing_user is not None:
             existing_user.username = message.text
             existing_user.language = user_language
             if existing_user.update():
@@ -71,6 +71,14 @@ def set_state_handlers(bot: "SolarDriveBot"):
             message.chat.id,
             bot.string(user_language, "successful_sign_up"),
             reply_markup=markups.remove_keyboard())
+        sqd_msg = await bot.client.send_message(
+            message.chat.id,
+            bot.string(user_language, "sqd_msg", balance=100),
+            reply_markup=markups.sqd_msg_markup(bot.languages[user_language])
+        )
+        await sqd_msg.pin()
+        new_user.sqd_msg_id = sqd_msg.message_id
+        new_user.update()
         section_image = bot.user_subsection(new_user)
         with bot.map_renderer.get_image_data(section_image) as image_data:
             await bot.client.send_photo(

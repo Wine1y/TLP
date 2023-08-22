@@ -8,5 +8,7 @@
     "unkown_error": "К сожалению, произошла непредвиденная ошибка",
     "no_user_error": "Сначала вам нужно использовать команду /start",
     "energy": "Энергия",
-    "current_map_seed": "Ключ текущей карты - %seed%"
+    "current_map_seed": "Ключ текущей карты - %seed%",
+    "sqd_msg": "Баланс: %balance% SDQ",
+    "sqd_button_text": "Управление"
 }
