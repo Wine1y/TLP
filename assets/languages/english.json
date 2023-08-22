@@ -1,0 +1,10 @@
+{
+    "LOCALIZATION_NAME": "English",
+
+    "select_nick": "Write a nickname for the game",
+    "nick_used": "Sorry, this nickname is already used, please try again",
+    "nick_too_long": "This nickname is too long, maximum nickname length - 10 symbols, please try again",
+    "unkown_error": "Unfortunately, an unknown error occured, please try again",
+    "energy": "Energy",
+    "current_map_seed": "Current map seed - %seed%"
+}

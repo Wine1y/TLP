@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 from typing import Union
 
 from core.db import BaseModel, get_session
@@ -7,14 +7,26 @@ from core.db import BaseModel, get_session
 class User(BaseModel):
     __tablename__ = "users"
 
+    username = Column(String, nullable=False, unique=True)
+    language = Column(String, nullable=False)
     tg_id = Column(Integer, nullable=False, unique=True)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
     energy = Column(Integer())
 
-    def __init__(self, tg_id: int, x: int, y: int, energy:int=100):
+    def __init__(
+        self,
+        username: str,
+        tg_id: int,
+        language: str,
+        x: int,
+        y: int,
+        energy:int=100,
+    ):
         super().__init__()
+        self.username = username
         self.tg_id = tg_id
+        self.language = language
         self.x = x
         self.y = y
         self.energy = energy
@@ -26,11 +38,11 @@ class User(BaseModel):
         if user is not None:
             user.session = session
         return user
-    
+
     @classmethod
-    def get_or_create(cls, tg_id: int, default_x: int, default_y: int) -> Union["User", None]:
-        user = cls.get_by_tg_id(tg_id)
+    def get_by_username(cls, username: str) -> Union["User", None]:
+        session = get_session()
+        user = session.query(cls).filter(cls.username==username).first()
         if user is not None:
-            return user
-        cls(tg_id, default_x, default_y).add()
-        return cls.get_by_tg_id(tg_id)
+            user.session = session
+        return user

@@ -2,7 +2,7 @@ from io import BytesIO
 from aiogram.types import CallbackQuery, InputMediaPhoto, InputFile
 from typing import Dict
 
-from core.bot.markups import ROVER_MOVE, CB_WIP, get_rover_controller
+from core.bot import markups
 from core.db import User
 
 _MOVE_DELTAS = {
@@ -14,11 +14,11 @@ _MOVE_DELTAS = {
 
 def set_callback_handlers(bot: "SolarDriveBot"):
     
-    @bot.dp.callback_query_handler(ROVER_MOVE.filter())
+    @bot.dp.callback_query_handler(markups.ROVER_MOVE.filter())
     async def move_handler(query: CallbackQuery, callback_data: Dict[str, str]):
         user = User.get_by_tg_id(query.from_user.id)
         if user is None:
-            await query.answer("К сожалению, произошла ошибка.")
+            await query.answer(bot.string("English", "unkown_error"))
             return
         delta = _MOVE_DELTAS[callback_data["direction"]]
         new_cords = bot.bot_map.normalize_cords([user.x+delta[0], user.y+delta[1]])
@@ -27,7 +27,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
             return
         user.x, user.y = new_cords[0], new_cords[1]
         if not user.update():
-            await query.answer("К сожалению, произошла ошибка.")
+            await query.answer(bot.string(user.language, "unkown_error"))
             return
         section_image = bot.map_renderer.DrawMapSubsection(
             bot.bot_map,
@@ -41,11 +41,12 @@ def set_callback_handlers(bot: "SolarDriveBot"):
             await query.message.edit_media(
                 InputMediaPhoto(
                 	InputFile(buffer, filename=f"{user.x}x{user.y}.png"),
-                	caption=f"X: *{user.x}* Y: *{user.y}*\nЭнергия: *{user.energy}%*",
+                	caption=f"X: *{user.x}* Y: *{user.y}*\n{bot.string(user.language, 'energy')}: *{user.energy}%*",
                 	parse_mode="Markdown"
                 ),
-                reply_markup=get_rover_controller()
+                reply_markup=markups.rover_controller()
             )
-    @bot.dp.callback_query_handler(CB_WIP.filter())
+
+    @bot.dp.callback_query_handler(markups.CB_WIP.filter())
     async def wip_handler(query: CallbackQuery):
-    	await query.answer()
+        await query.answer()
