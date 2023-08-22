@@ -21,7 +21,3 @@ if __name__ == "__main__":
         languages=load_languages(path.join("assets", "languages"))
     )
     bot.start_polling()
-
-#Отрисовка всех пользователей в секции (через where query с больше меньше)
-#Отрисовка ников под пользователями
-#Невозможность сходить на уже занятую клетку (чек через тот же where query)

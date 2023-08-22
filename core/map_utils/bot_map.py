@@ -14,6 +14,7 @@ class MapTile(Enum):
     Mountains=Tile(3, walkable=False)
 
 class BotMap():
+    parent_map: "BotMap"
     start_coordinates: List[int]
     width: int
     height: int
@@ -22,13 +23,41 @@ class BotMap():
     def __init__(
         self,
         tiles: List[List[MapTile]],
-        start_coordinates: Optional[List[int]]=None
+        start_coordinates: Optional[List[int]]=None,
+        parent_map: Optional["BotMap"]=None
     ):
         self.tiles = tiles
         self.height = len(self.tiles)
         self.width = len(self.tiles[0]) if self.height > 0 else 0
         self.start_coordinates = start_coordinates if start_coordinates is not None else [0, 0]
-    
+        self.parent_map = parent_map
+
+    def calc_subsection_bbox(
+        self,
+        center_cords: List[int],
+        section_w: int,
+        section_h : int,
+    ):
+        if center_cords[0] > self.width or center_cords[1] > self.height:
+            raise RuntimeError(
+                f"Invalid subsection center ({center_cords[0]}x{center_cords[1]}) for ({self.width}x{self.height}) map"
+            )
+        if section_w > self.width:
+            raise RuntimeError(
+                f"Invalid subsection width ({section_w}), map is only {self.width} tiles wide"
+            )
+        if section_h > self.height:
+            raise RuntimeError(
+                f"Invalid subsection width ({section_h}), map is only {self.height} tiles tall"
+            )
+        start_x, start_y = center_cords[0]-section_w//2, center_cords[1]-section_h//2
+        end_x, end_y = center_cords[0]+section_w//2, center_cords[1]+section_h//2
+        if end_x >= self.width:
+            end_x -= self.width
+        if end_y >= self.height:
+            end_y -= self.height
+        return [start_x, start_y, end_x+1, end_y+1]
+
     def get_subsection(
         self,
         from_x: int,
@@ -44,7 +73,7 @@ class BotMap():
             row[from_x:to_x] if from_x >= 0 and from_x < to_x else row[from_x:]+row[:to_x]
             for row in rows
         ]
-        return BotMap(section_tiles, start_coordinates=[from_x, from_y])
+        return BotMap(section_tiles, start_coordinates=[from_x, from_y], parent_map=self)
     
     def tile_at(self, x: int, y: int) -> MapTile:
         if x >= self.width or y >= self.height:

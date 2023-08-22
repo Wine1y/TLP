@@ -15,7 +15,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user is None:
             await message.reply(bot.string("English", "no_user_error"))
             return
-        map_image = bot.map_renderer.DrawMap(bot.bot_map, draw_rover=False)
+        map_image = bot.map_renderer.DrawMap(bot.bot_map, draw_players=False)
         with bot.map_renderer.get_image_data(map_image) as image_data:
             await bot.client.send_document(
                 caption=bot.string(user.language, "current_map_seed", seed=bot.map_seed),
@@ -29,7 +29,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
     async def cmd_random_map(message: types.Message):
         seed = randint(0, 999999999)
         random_map = bot.map_generator.BuildMap(seed, bot.map_size, bot.map_size)
-        map_img = bot.map_renderer.DrawMap(random_map, draw_rover=False)
+        map_img = bot.map_renderer.DrawMap(random_map, draw_players=False)
         with bot.map_renderer.get_image_data(map_img) as image_data: 
             await bot.client.send_document(
                 chat_id=message.chat.id,
@@ -61,3 +61,31 @@ def set_message_handlers(bot: "SolarDriveBot"):
             reply_markup=markups.languages_markup(bot.languages)
         )
         await state.set_state(StartingForm.language)
+    
+    @bot.dp.message_handler(commands=["tp"])
+    async def cmd_teleport(message: types.Message):
+        args = message.text.split(" ")
+        usage = "Использование: /tp (nickname) (new x coordinate) (new y coordinate)"
+        if len(args) != 4:
+            await message.reply(usage)
+            return
+        try:
+            x = int(args[2])
+            y = int(args[3])
+        except ValueError:
+            await message.reply(usage)
+            return
+        if x >= bot.map_size or y >= bot.map_size or x < 0 or y < 0:
+            await message.reply("Координаты невалидны")
+            return
+        user = User.get_by_username(args[1])
+        if user is None:
+            await message.reply("Пользователь не найден")
+            return
+        user.x = x
+        user.y = y
+        if not user.update():
+            await message.reply("Неизвестная ошибка")
+        await message.reply(f"Пользователь {args[1]} телепортирован")
+        
+        

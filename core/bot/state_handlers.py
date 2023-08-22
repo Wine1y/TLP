@@ -67,6 +67,10 @@ def set_state_handlers(bot: "SolarDriveBot"):
             )
             return
         await state.finish()
+        await bot.client.send_message(
+            message.chat.id,
+            bot.string(user_language, "successful_sign_up"),
+            reply_markup=markups.remove_keyboard())
         section_image = bot.user_subsection(new_user)
         with bot.map_renderer.get_image_data(section_image) as image_data:
             await bot.client.send_photo(
