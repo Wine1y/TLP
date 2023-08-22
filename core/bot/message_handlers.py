@@ -13,7 +13,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
     async def cmd_map(message: types.Message):
         user = User.get_by_tg_id(message.from_id)
         if user is None:
-            await message.reply(bot.string("English", "unkown_error"))
+            await message.reply(bot.string("English", "no_user_error"))
             return
         map_image = bot.map_renderer.DrawMap(bot.bot_map, draw_rover=False)
         with bot.map_renderer.get_image_data(map_image) as image_data:
@@ -41,7 +41,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
     async def cmd_play(message: types.Message):
         user = User.get_by_tg_id(message.from_id)
         if user is None:
-            await message.reply(bot.string("English", "unkown_error"))
+            await message.reply(bot.string("English", "no_user_error"))
             return
         section_image = bot.user_subsection(user)
         with bot.map_renderer.get_image_data(section_image) as image_data:

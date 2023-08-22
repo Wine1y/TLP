@@ -17,7 +17,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     async def move_handler(query: CallbackQuery, callback_data: Dict[str, str]):
         user = User.get_by_tg_id(query.from_user.id)
         if user is None:
-            await query.answer(bot.string("English", "unkown_error"))
+            await query.answer(bot.string("English", "no_user_error"))
             return
         delta = _MOVE_DELTAS[callback_data["direction"]]
         new_cords = bot.bot_map.normalize_cords([user.x+delta[0], user.y+delta[1]])
