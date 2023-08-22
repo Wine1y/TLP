@@ -2,6 +2,9 @@ from typing import List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
+from core.db import User
+
+
 @dataclass
 class Tile:
     id: int
@@ -98,8 +101,11 @@ class BotMap():
             for sibling_cords in closest_siblings:
                 if abs(sibling_cords[0]) > self.width or abs(sibling_cords[1]) > self.height:
                     continue
-                if self.tile_at(sibling_cords[0], sibling_cords[1]).value.walkable:
-                    return sibling_cords
+                if not self.tile_at(sibling_cords[0], sibling_cords[1]).value.walkable:
+                    continue
+                if User.get_by_coordinates(sibling_cords[0], sibling_cords[1]) is not None:
+                    continue
+                return sibling_cords
         return None
     
     def normalize_cords(self, cords: List[int]) -> List[int]:
