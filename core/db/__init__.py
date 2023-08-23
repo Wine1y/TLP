@@ -16,6 +16,6 @@ def get_session():
 
 from core.db.models.base import BASE, BaseModel
 from core.db.models.user import User
-from core.db.models.sand_pile import SandPile
+from core.db.models.changed_tile import ChangedTile
 from core.db.repositories.user import UserRepository
-from core.db.repositories.sand_pile import SandPileRepository
+from core.db.repositories.changed_tile import ChangedTileRepository

@@ -28,7 +28,12 @@ def set_message_handlers(bot: "SolarDriveBot"):
     @bot.dp.message_handler(commands=["random_map"])
     async def cmd_random_map(message: types.Message):
         seed = randint(0, 999999999)
-        random_map = bot.map_generator.BuildMap(seed, bot.map_size, bot.map_size)
+        random_map = bot.map_generator.BuildMap(
+            seed,
+            bot.map_size,
+            bot.map_size,
+            add_changed_tiles=False
+        )
         map_img = bot.map_renderer.DrawMap(random_map, draw_players=False)
         with bot.map_renderer.get_image_data(map_img) as image_data: 
             await bot.client.send_document(

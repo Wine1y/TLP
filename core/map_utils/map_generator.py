@@ -4,7 +4,7 @@ from typing import List
 from random import sample
 
 from core.map_utils.bot_map import BotMap, MapTile
-from core.db import SandPileRepository, UserRepository, SandPile
+from core.db import ChangedTileRepository, UserRepository, ChangedTile
 
 
 _PERLIN_OCTAVES = [6, 12]
@@ -19,7 +19,13 @@ _TILES_MAX_PERLIN_VALUE = [
 _NATURAL_SAND_PILES_COEFFICIENT = 0.33
 
 class MapGenerator(ABC):
-    def BuildMap(self, seed: int, map_w: int, map_h: int) -> BotMap:
+    def BuildMap(
+        self,
+        seed: int,
+        map_w: int,
+        map_h: int,
+        add_changed_tiles: bool=True
+    ) -> BotMap:
         ...
 
 def linspace(start: float, end: float, length: int) -> List[float]:
@@ -28,7 +34,13 @@ def linspace(start: float, end: float, length: int) -> List[float]:
     return [start+h*i for i in range(length)][:-1]
 
 class PerlinMapGenerator(MapGenerator):
-    def BuildMap(self, seed: int, map_w: int, map_h: int) -> BotMap:
+    def BuildMap(
+        self,
+        seed: int,
+        map_w: int,
+        map_h: int,
+        add_changed_tiles: bool=True
+    ) -> BotMap:
         perlins = [PerlinNoise(octave, seed) for octave in _PERLIN_OCTAVES]
         noise = [
             [
@@ -39,7 +51,8 @@ class PerlinMapGenerator(MapGenerator):
         ]
         noise = self._merge_edges(noise)
         bot_map = self._noise_to_map(noise)
-        bot_map = self._place_sand_piles(bot_map)
+        if add_changed_tiles:
+            bot_map = self._place_changed_tiles(bot_map)
         return bot_map
     
     def _get_noises_val(self, perlins: List[PerlinNoise], cords: List[int]) -> float:
@@ -82,14 +95,15 @@ class PerlinMapGenerator(MapGenerator):
                 noise[y][len(noise[y])-1-edge_offset] = right_line[y]
         return noise
     
-    def _place_sand_piles(self, bot_map: BotMap) -> BotMap:
-        sand_rep, user_rep = SandPileRepository(), UserRepository()
-        piles = sand_rep.get_every()
+    def _place_changed_tiles(self, bot_map: BotMap) -> BotMap:
+        registered_tiles = list(MapTile)
+        tiles_rep, user_rep = ChangedTileRepository(), UserRepository()
+        tiles = tiles_rep.get_every()
         natural_piles_required = round(bot_map.width*_NATURAL_SAND_PILES_COEFFICIENT)
-        for pile in piles:
-            if pile.spawned_naturally:
+        for tile in tiles:
+            if tile.tile_id==MapTile.SandPile.id and tile.spawned_naturally:
                 natural_piles_required-=1
-            bot_map.set_tile_at(pile.x, pile.y, MapTile.SandPile)
+            bot_map.set_tile_at(tile.x, tile.y, registered_tiles[tile.tile_id])
         if natural_piles_required > 0:
             available_coords = [
                 (x,y)
@@ -98,7 +112,13 @@ class PerlinMapGenerator(MapGenerator):
                 if bot_map.is_walkable(x, y, user_rep)
             ]
             for new_pile_cords in sample(available_coords, natural_piles_required):
-                pile = SandPile(new_pile_cords[0], new_pile_cords[1], spawned_naturally=True)
-                if sand_rep.add(pile):
+                pile = ChangedTile(
+                    MapTile.SandPile.id,
+                    new_pile_cords[0],
+                    new_pile_cords[1],
+                    spawned_naturally=True
+                )
+                if tiles_rep.add(pile):
                     bot_map.set_tile_at(pile.x, pile.y, MapTile.SandPile)
         return bot_map
+        
