@@ -2,7 +2,7 @@ from typing import List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-from core.db import User
+from core.db import UserRepository
 
 
 @dataclass
@@ -103,10 +103,16 @@ class BotMap():
             raise RuntimeError(f"Invalid coordinates ({x}x{y}), for {self.width}x{self.height} map")
         return self.tiles[y][x]
     
+    def set_tile_at(self, x: int, y: int, tile: MapTile) -> None:
+        if x >= self.width or y >= self.height:
+            raise RuntimeError(f"Invalid coordinates ({x}x{y}), for {self.width}x{self.height} map")
+        self.tiles[y][x] = tile
+    
     def closest_walkable(self, cords: List[int]) -> Optional[List[int]]:
         if self.tile_at(cords[0], cords[1]).walkable:
             return cords
         max_radius = max(self.width-cords[0], self.height-cords[1])
+        rep = UserRepository()
         for radius in range(1, max_radius):
             closest_siblings = [
                 (cords[0]-radius, cords[1]),        #L
@@ -121,12 +127,13 @@ class BotMap():
             for sibling_cords in closest_siblings:
                 if abs(sibling_cords[0]) > self.width or abs(sibling_cords[1]) > self.height:
                     continue
-                if not self.tile_at(sibling_cords[0], sibling_cords[1]).walkable:
-                    continue
-                if User.get_by_coordinates(sibling_cords[0], sibling_cords[1]) is not None:
+                if not self.is_walkable(sibling_cords[0], sibling_cords[1], rep):
                     continue
                 return sibling_cords
         return None
+    
+    def is_walkable(self, x: int, y: int, user_rep: UserRepository) -> bool:
+        return self.tile_at(x, y).walkable and user_rep.get_by_coordinates(x, y) is None
     
     def normalize_cords(self, cords: List[int]) -> List[int]:
         x, y = cords[0], cords[1]

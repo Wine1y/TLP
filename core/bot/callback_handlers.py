@@ -3,7 +3,7 @@ from typing import Dict
 
 from core.bot import markups
 from core.map_utils.bot_map import MapTile
-from core.db import User
+from core.db import UserRepository
 
 _MOVE_DELTAS = {
     "top": (0, -1),
@@ -16,7 +16,8 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.callback_query_handler(markups.ROVER_MOVE.filter())
     async def move_handler(query: CallbackQuery, callback_data: Dict[str, str]):
-        user = User.get_by_tg_id(query.from_user.id)
+        rep = UserRepository()
+        user = rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
@@ -25,11 +26,11 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if not bot.bot_map.tile_at(new_cords[0], new_cords[1]).walkable:
             await query.answer()
             return
-        if User.get_by_coordinates(new_cords[0], new_cords[1]) is not None:
+        if rep.get_by_coordinates(new_cords[0], new_cords[1]) is not None:
             await query.answer()
             return
         user.x, user.y = new_cords[0], new_cords[1]
-        if not user.update():
+        if not rep.commit():
             await query.answer(bot.string(user.language, "unkown_error"))
             return
         section_image = bot.user_subsection(user)
@@ -45,7 +46,8 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="waiting"))
     async def dig_handler(query: CallbackQuery):
-        user = User.get_by_tg_id(query.from_user.id)
+        rep = UserRepository()
+        user = rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
@@ -60,7 +62,8 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="canceled"))
     async def dig_canceled(query: CallbackQuery):
-        user = User.get_by_tg_id(query.from_user.id)
+        rep = UserRepository()
+        user = rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return

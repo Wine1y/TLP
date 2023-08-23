@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from random import randint
 
-from core.db.user import User
+from core.db import UserRepository
 from core.bot import markups, states
 
 
@@ -10,7 +10,8 @@ def set_message_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.message_handler(commands=["map"])
     async def cmd_map(message: types.Message):
-        user = User.get_by_tg_id(message.from_id)
+        rep = UserRepository()
+        user = rep.get_by_tg_id(message.from_id)
         if user is None:
             await message.reply(bot.string("English", "no_user_error"))
             return
@@ -38,7 +39,8 @@ def set_message_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.message_handler(commands=["play"])
     async def cmd_play(message: types.Message):
-        user = User.get_by_tg_id(message.from_id)
+        rep = UserRepository()
+        user = rep.get_by_tg_id(message.from_id)
         if user is None:
             await message.reply(bot.string("English", "no_user_error"))
             return
@@ -77,13 +79,14 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if x >= bot.map_size or y >= bot.map_size or x < 0 or y < 0:
             await message.reply("Координаты невалидны")
             return
-        user = User.get_by_username(args[1])
+        rep = UserRepository()
+        user = rep.get_by_username(args[1])
         if user is None:
             await message.reply("Пользователь не найден")
             return
         user.x = x
         user.y = y
-        if not user.update():
+        if not rep.commit():
             await message.reply("Неизвестная ошибка")
         await message.reply(f"Пользователь {args[1]} телепортирован")
         

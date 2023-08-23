@@ -1,8 +1,11 @@
 from abc import ABC
 from perlin_noise import PerlinNoise
 from typing import List
+from random import sample
 
 from core.map_utils.bot_map import BotMap, MapTile
+from core.db import SandPileRepository, UserRepository, SandPile
+
 
 _PERLIN_OCTAVES = [6, 12]
 _OCTAVE_STEP = 0.5
@@ -13,6 +16,7 @@ _TILES_MAX_PERLIN_VALUE = [
     (MapTile.Stone, 0.28),
     (MapTile.Mountains, None)
 ]
+_NATURAL_SAND_PILES_COEFFICIENT = 0.33
 
 class MapGenerator(ABC):
     def BuildMap(self, seed: int, map_w: int, map_h: int) -> BotMap:
@@ -34,7 +38,9 @@ class PerlinMapGenerator(MapGenerator):
             for i in range(map_h)
         ]
         noise = self._merge_edges(noise)
-        return self._noise_to_map(noise)
+        bot_map = self._noise_to_map(noise)
+        bot_map = self._place_sand_piles(bot_map)
+        return bot_map
     
     def _get_noises_val(self, perlins: List[PerlinNoise], cords: List[int]) -> float:
         return sum([
@@ -75,3 +81,24 @@ class PerlinMapGenerator(MapGenerator):
             for y in range(len(noise)):
                 noise[y][len(noise[y])-1-edge_offset] = right_line[y]
         return noise
+    
+    def _place_sand_piles(self, bot_map: BotMap) -> BotMap:
+        sand_rep, user_rep = SandPileRepository(), UserRepository()
+        piles = sand_rep.get_every()
+        natural_piles_required = round(bot_map.width*_NATURAL_SAND_PILES_COEFFICIENT)
+        for pile in piles:
+            if pile.spawned_naturally:
+                natural_piles_required-=1
+            bot_map.set_tile_at(pile.x, pile.y, MapTile.SandPile)
+        if natural_piles_required > 0:
+            available_coords = [
+                (x,y)
+                for x in range(bot_map.width)
+                for y in range(bot_map.height)
+                if bot_map.is_walkable(x, y, user_rep)
+            ]
+            for new_pile_cords in sample(available_coords, natural_piles_required):
+                pile = SandPile(new_pile_cords[0], new_pile_cords[1], spawned_naturally=True)
+                if sand_rep.add(pile):
+                    bot_map.set_tile_at(pile.x, pile.y, MapTile.SandPile)
+        return bot_map

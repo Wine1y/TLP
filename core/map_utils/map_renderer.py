@@ -5,7 +5,7 @@ from typing import List
 from os import getenv, path
 
 from core.map_utils.bot_map import BotMap, MapTile
-from core.db import User
+from core.db import User, UserRepository
 
 
 class MapRenderer(ABC):
@@ -65,7 +65,8 @@ class StaticRenderer(MapRenderer):
                     bot_map.start_coordinates[1]+bot_map.height
                 ]
             right_bottom_xy = main_map.normalize_cords(right_bottom_xy)
-            for user in User.every_in_rectangle(left_top_xy, right_bottom_xy, main_map.width):
+            rep = UserRepository()
+            for user in rep.get_every_in_rectangle(left_top_xy, right_bottom_xy, main_map.width):
                 user_cords = [
                     user.x-bot_map.start_coordinates[0],
                     user.y-bot_map.start_coordinates[1]

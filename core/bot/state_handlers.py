@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from core.db.user import User
+from core.db import User, UserRepository
 from core.bot import markups
 from core.bot.states import StartingForm
 
@@ -36,19 +36,20 @@ def set_state_handlers(bot: "SolarDriveBot"):
                 reply_markup=markups.nickname_markup(message.from_user.username)
             )
             return
-        if (nick_owner := User.get_by_username(message.text)) is not None and nick_owner.tg_id != message.from_id:
+        rep = UserRepository()
+        if (nick_owner := rep.get_by_username(message.text)) is not None and nick_owner.tg_id != message.from_id:
             await bot.client.send_message(
                 message.chat.id,
                 bot.string(user_language, "nick_used"),
                 reply_markup=markups.nickname_markup(message.from_user.username)
             )
             return
-        existing_user = User.get_by_tg_id(message.from_id)
+        existing_user = rep.get_by_tg_id(message.from_id)
         new_user = None
         if existing_user is not None:
             existing_user.username = message.text
             existing_user.language = user_language
-            if existing_user.update():
+            if rep.commit():
                 new_user = existing_user
         else:
             user = User(
@@ -58,8 +59,8 @@ def set_state_handlers(bot: "SolarDriveBot"):
                 x=bot.starting_cords[0],
                 y=bot.starting_cords[1]
             )
-            if user.add():
-                new_user = user
+            if rep.add(user):
+                new_user = rep.get_by_tg_id(message.from_id)
         if new_user is None:
             await bot.client.send_message(
                 message.chat.id,
@@ -80,7 +81,7 @@ def set_state_handlers(bot: "SolarDriveBot"):
             await bot.client.unpin_chat_message(message.chat.id, new_user.sqd_msg_id)
         await sqd_msg.pin()
         new_user.sqd_msg_id = sqd_msg.message_id
-        new_user.update()
+        rep.commit()
         section_image = bot.user_subsection(new_user)
         with bot.map_renderer.get_image_data(section_image) as image_data:
             await bot.client.send_photo(
