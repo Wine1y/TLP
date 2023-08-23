@@ -4,13 +4,13 @@ from typing import List
 
 from core.map_utils.bot_map import BotMap, MapTile
 
-_PERLIN_OCTAVES = [3, 6]
+_PERLIN_OCTAVES = [6, 12]
 _OCTAVE_STEP = 0.5
 _EDGE_LENGTH=5
 _TILES_MAX_PERLIN_VALUE = [
-    (MapTile.Water, -0.31),
-    (MapTile.Sand, -0.1),
-    (MapTile.Stone, 0.3),
+    (MapTile.Water, -0.3),
+    (MapTile.Sand, -0.08),
+    (MapTile.Stone, 0.28),
     (MapTile.Mountains, None)
 ]
 
