@@ -2,6 +2,7 @@ from aiogram.types import CallbackQuery, InputMediaPhoto, InputFile
 from typing import Dict
 
 from core.bot import markups
+from core.map_utils.bot_map import MapTile
 from core.db import User
 
 _MOVE_DELTAS = {
@@ -41,6 +42,34 @@ def set_callback_handlers(bot: "SolarDriveBot"):
                 ),
                 reply_markup=markups.rover_controller()
             )
+    
+    @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="waiting"))
+    async def dig_handler(query: CallbackQuery):
+        user = User.get_by_tg_id(query.from_user.id)
+        if user is None:
+            await query.answer(bot.string("English", "no_user_error"))
+            return
+        user_tile = bot.bot_map.tile_at(user.x, user.y)
+        if user_tile != MapTile.Sand:
+            await query.answer(bot.string(user.language, "dig_not_on_sand"))
+            return
+        await query.message.edit_caption(
+            caption=bot.string(user.language, "confirm_dig"),
+            reply_markup=markups.dig_confirm(bot.languages[user.language])
+        )
+    
+    @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="canceled"))
+    async def dig_canceled(query: CallbackQuery):
+        user = User.get_by_tg_id(query.from_user.id)
+        if user is None:
+            await query.answer(bot.string("English", "no_user_error"))
+            return
+        await query.message.edit_caption(
+            caption=bot.user_controller_info(user),
+            parse_mode="Markdown",
+            reply_markup=markups.rover_controller()
+        )
+        
 
     @bot.dp.callback_query_handler(markups.CB_WIP.filter())
     async def wip_handler(query: CallbackQuery):

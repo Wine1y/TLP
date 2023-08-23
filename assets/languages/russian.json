@@ -10,5 +10,9 @@
     "energy": "Энергия",
     "current_map_seed": "Ключ текущей карты - %seed%",
     "sqd_msg": "Баланс: %balance% SDQ",
-    "sqd_button_text": "Управление"
+    "sqd_button_text": "Управление",
+    "dig_not_on_sand": "Вы можете копать только на песке",
+    "confirm_dig": "Подтвердите действие",
+    "dig_confirmed": "Копать",
+    "cancel": "Отмена"
 }

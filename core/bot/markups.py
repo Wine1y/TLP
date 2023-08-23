@@ -8,6 +8,7 @@ from core.bot.language import BotLanguage
 
 
 ROVER_MOVE = CallbackData("move", "direction")
+ROVER_DIG = CallbackData("dig", "status")
 CB_WIP = CallbackData("wip")
 
 def remove_keyboard() -> ReplyKeyboardRemove:
@@ -20,7 +21,7 @@ def rover_controller() -> InlineKeyboardMarkup:
         InlineKeyboardButton("⬆️", callback_data=ROVER_MOVE.new(direction="top")),
         InlineKeyboardButton(" ", callback_data=CB_WIP.new()),
         InlineKeyboardButton("⬅️", callback_data=ROVER_MOVE.new(direction="left")),
-        InlineKeyboardButton(" ", callback_data=CB_WIP.new()),
+        InlineKeyboardButton("⛏️", callback_data=ROVER_DIG.new(status="waiting")),
         InlineKeyboardButton("➡️", callback_data=ROVER_MOVE.new(direction="right")),
         InlineKeyboardButton(" ", callback_data=CB_WIP.new()),
         InlineKeyboardButton("⬇️", callback_data=ROVER_MOVE.new(direction="bottom")),
@@ -51,6 +52,20 @@ def sqd_msg_markup(language: BotLanguage) -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             language.string("sqd_button_text"),
             callback_data=CB_WIP.new()
+        )
+    )
+    return markup
+
+def dig_confirm(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("dig_confirmed"),
+            callback_data=CB_WIP.new()
+        ),
+        InlineKeyboardButton(
+            language.string("cancel"),
+            callback_data=ROVER_DIG.new(status="canceled")
         )
     )
     return markup

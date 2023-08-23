@@ -3,8 +3,7 @@ from aiogram.dispatcher import FSMContext
 from random import randint
 
 from core.db.user import User
-from core.bot import markups
-from core.bot.states import StartingForm
+from core.bot import markups, states
 
 
 def set_message_handlers(bot: "SolarDriveBot"):
@@ -60,7 +59,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
             "Please, set a language\n\nПожалуйста, выберите язык",
             reply_markup=markups.languages_markup(bot.languages)
         )
-        await state.set_state(StartingForm.language)
+        await state.set_state(states.StartingForm.language)
     
     @bot.dp.message_handler(commands=["tp"])
     async def cmd_teleport(message: types.Message):

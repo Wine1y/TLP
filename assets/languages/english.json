@@ -10,5 +10,9 @@
     "energy": "Energy",
     "current_map_seed": "Current map seed - %seed%",
     "sqd_msg": "Balance: %balance% SDQ",
-    "sqd_button_text": "Management"
+    "sqd_button_text": "Management",
+    "dig_not_on_sand": "You can only dig at sand",
+    "confirm_dig": "Confirm your action",
+    "dig_confirmed": "Dig",
+    "cancel": "Cancel"
 }
