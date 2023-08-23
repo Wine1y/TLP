@@ -46,6 +46,7 @@ class StaticRenderer(MapRenderer):
         MapTile.Sand: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (255, 213, 123)),
         MapTile.Stone: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (146, 143, 136)),
         MapTile.Mountains: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (49, 48, 47)),
+        MapTile.SandPile: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (208, 98, 23))
     }
     ROVER_IMAGE = Image.open(path.join("assets", "rover.png"))
     

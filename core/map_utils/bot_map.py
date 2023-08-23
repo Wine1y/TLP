@@ -9,12 +9,32 @@ from core.db import User
 class Tile:
     id: int
     walkable: bool=True
+    can_fit_sand_pile: bool=True
 
 class MapTile(Enum):
     Water=Tile(0, walkable=False)
     Sand=Tile(1)
     Stone=Tile(2)
-    Mountains=Tile(3, walkable=False)
+    Mountains=Tile(3, walkable=False, can_fit_sand_pile=False)
+    SandPile=Tile(4, walkable=False, can_fit_sand_pile=False)
+
+    @property
+    def can_fit_sand_pile(self) -> bool:
+        return self.value.can_fit_sand_pile
+    
+    @property
+    def walkable(self) -> bool:
+        return self.value.walkable
+
+    @property
+    def id(self) -> int:
+        return self.value.id
+
+_SAND_PILED_TILES = {
+    MapTile.Water: MapTile.Sand,
+    MapTile.Sand: MapTile.SandPile,
+    MapTile.Stone: MapTile.SandPile,
+}
 
 class BotMap():
     parent_map: "BotMap"
@@ -84,7 +104,7 @@ class BotMap():
         return self.tiles[y][x]
     
     def closest_walkable(self, cords: List[int]) -> Optional[List[int]]:
-        if self.tile_at(cords[0], cords[1]).value.walkable:
+        if self.tile_at(cords[0], cords[1]).walkable:
             return cords
         max_radius = max(self.width-cords[0], self.height-cords[1])
         for radius in range(1, max_radius):
@@ -101,7 +121,7 @@ class BotMap():
             for sibling_cords in closest_siblings:
                 if abs(sibling_cords[0]) > self.width or abs(sibling_cords[1]) > self.height:
                     continue
-                if not self.tile_at(sibling_cords[0], sibling_cords[1]).value.walkable:
+                if not self.tile_at(sibling_cords[0], sibling_cords[1]).walkable:
                     continue
                 if User.get_by_coordinates(sibling_cords[0], sibling_cords[1]) is not None:
                     continue
@@ -119,3 +139,6 @@ class BotMap():
         if y >= self.height:
             y-=self.height
         return [x, y]
+
+def put_sand_pile(tile: MapTile) -> MapTile:
+    return MapTile(_SAND_PILED_TILES[tile])

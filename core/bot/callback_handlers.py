@@ -21,7 +21,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
             return
         delta = _MOVE_DELTAS[callback_data["direction"]]
         new_cords = bot.bot_map.normalize_cords([user.x+delta[0], user.y+delta[1]])
-        if not bot.bot_map.tile_at(new_cords[0], new_cords[1]).value.walkable:
+        if not bot.bot_map.tile_at(new_cords[0], new_cords[1]).walkable:
             await query.answer()
             return
         if User.get_by_coordinates(new_cords[0], new_cords[1]) is not None:
