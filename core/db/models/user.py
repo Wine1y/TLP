@@ -9,7 +9,8 @@ class User(BaseModel):
     username = Column(String, nullable=False, unique=True)
     language = Column(String, nullable=False)
     tg_id = Column(Integer, nullable=False, unique=True)
-    sqd_msg_id = Column(Integer, nullable=True)
+    sdq_msg_id = Column(Integer, nullable=True)
+    sdq_balance = Column(Integer, default=100)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
     energy = Column(Integer)
@@ -21,11 +22,13 @@ class User(BaseModel):
         language: str,
         x: int,
         y: int,
+        sdq_balance: int,
         energy:int=100,
     ):
         self.username = username
         self.tg_id = tg_id
         self.sqd_msg_id=None
+        self.sqd_balance = sdq_balance
         self.language = language
         self.x = x
         self.y = y

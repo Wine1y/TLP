@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from os import getenv
 
 from core.db import User, UserRepository
 from core.bot import markups
@@ -49,6 +50,7 @@ def set_state_handlers(bot: "SolarDriveBot"):
         if existing_user is not None:
             existing_user.username = message.text
             existing_user.language = user_language
+            existing_user.sdq_balance = existing_user.sdq_balance or int(getenv("STARTING_BALANCE"))
             if rep.commit():
                 new_user = existing_user
         else:
@@ -57,7 +59,8 @@ def set_state_handlers(bot: "SolarDriveBot"):
                 tg_id=message.from_id,
                 language=user_language,
                 x=bot.starting_cords[0],
-                y=bot.starting_cords[1]
+                y=bot.starting_cords[1],
+                sdq_balance=int(getenv("STARTING_BALANCE"))
             )
             if rep.add(user):
                 new_user = rep.get_by_tg_id(message.from_id)
@@ -72,15 +75,15 @@ def set_state_handlers(bot: "SolarDriveBot"):
             message.chat.id,
             bot.string(user_language, "successful_sign_up"),
             reply_markup=markups.remove_keyboard())
-        sqd_msg = await bot.client.send_message(
+        sdq_msg = await bot.client.send_message(
             message.chat.id,
-            bot.string(user_language, "sqd_msg", balance=100),
+            bot.string(user_language, "sdq_msg", balance=new_user.sdq_balance),
             reply_markup=markups.sqd_msg_markup(bot.languages[user_language])
         )
-        if new_user.sqd_msg_id is not None:
-            await bot.client.unpin_chat_message(message.chat.id, new_user.sqd_msg_id)
-        await sqd_msg.pin()
-        new_user.sqd_msg_id = sqd_msg.message_id
+        if new_user.sdq_msg_id is not None:
+            await bot.client.unpin_chat_message(message.chat.id, new_user.sdq_msg_id)
+        await sdq_msg.pin()
+        new_user.sdq_msg_id = sdq_msg.message_id
         rep.commit()
         section_image = bot.user_subsection(new_user)
         with bot.map_renderer.get_image_data(section_image) as image_data:

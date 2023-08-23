@@ -50,7 +50,7 @@ def sqd_msg_markup(language: BotLanguage) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
     markup.add(
         InlineKeyboardButton(
-            language.string("sqd_button_text"),
+            language.string("sdq_button_text"),
             callback_data=CB_WIP.new()
         )
     )
