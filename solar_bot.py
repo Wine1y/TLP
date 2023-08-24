@@ -3,13 +3,14 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from typing import List, Dict, Any
 
 from core.bot.message_handlers import set_message_handlers
+from core.bot import markups
 from core.bot.callback_handlers import set_callback_handlers
 from core.bot.state_handlers import set_state_handlers
 from core.bot.language import BotLanguage
 from core.map_utils.bot_map import BotMap
 from core.map_utils.map_generator import MapGenerator
 from core.map_utils.map_renderer import MapRenderer
-from core.db import User
+from core.db import User, UserRepository
 
 
 class SolarDriveBot():
@@ -68,3 +69,16 @@ class SolarDriveBot():
     
     def user_controller_info(self, user: User) -> str:
         return f"X: *{user.x}* Y: *{user.y}*\n{self.string(user.language, 'energy')}: *{user.energy}%*"
+    
+    async def update_user_balance(self, user: User, rep: UserRepository, new_balance: int) -> bool:
+        user.sdq_balance = new_balance
+        if not rep.commit():
+            return False
+        if user.sdq_msg_id is not None:
+            await self.client.edit_message_text(
+                self.string(user.language, "sdq_msg", balance=new_balance),
+                chat_id=user.tg_id,
+                message_id=user.sdq_msg_id,
+                reply_markup=markups.sqd_msg_markup(self.languages[user.language])
+            )
+        return True

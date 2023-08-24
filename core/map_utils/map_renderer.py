@@ -40,22 +40,23 @@ class MapRenderer(ABC):
 class StaticRenderer(MapRenderer):
     TILE_SIZE = int(getenv("TILE_SIZE"))
     NICKNAME_MARGIN = -4
-    NICKNAME_COLOR = (255, 255, 255)
+    NICKNAME_COLOR = (0, 0, 0)
     TILE_IMAGES = {
-        MapTile.Water: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (29, 91, 234)),
-        MapTile.Sand: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (255, 213, 123)),
-        MapTile.Stone: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (146, 143, 136)),
-        MapTile.Mountains: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (49, 48, 47)),
-        MapTile.SandPile: Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (208, 98, 23))
+        MapTile.Water: Image.open(path.join("assets", "textures", "water.png")),
+        MapTile.Sand: Image.open(path.join("assets", "textures", "sand.png")),
+        MapTile.Stone: Image.open(path.join("assets", "textures", "stone.png")),
+        MapTile.Mountains: Image.open(path.join("assets", "textures", "mountain.png")),
+        MapTile.SandPile: Image.open(path.join("assets", "textures", "sand_pile.png")),
+        MapTile.GrainySand: Image.open(path.join("assets", "textures", "grainy_sand.png"))
     }
-    ROVER_IMAGE = Image.open(path.join("assets", "rover.png"))
+    ROVER_IMAGE = Image.open(path.join("assets", "textures", "rover.png"))
     
     def DrawMap(self, bot_map: BotMap, draw_players: bool=True) -> Image.Image:
         image = Image.new("RGBA", (self.TILE_SIZE*bot_map.width, self.TILE_SIZE*bot_map.height))
         for y in range(bot_map.height):
             for x in range(bot_map.width):
                 tile_img = self.TILE_IMAGES[bot_map.tile_at(x, y)]
-                image.paste(tile_img, (x*self.TILE_SIZE, y*self.TILE_SIZE), tile_img)
+                image.paste(tile_img, (x*self.TILE_SIZE, y*self.TILE_SIZE))
         if draw_players:
             draw = ImageDraw.Draw(image)
             main_map = bot_map.parent_map or bot_map

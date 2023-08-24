@@ -93,6 +93,17 @@ def set_message_handlers(bot: "SolarDriveBot"):
         user.y = y
         if not rep.commit():
             await message.reply("Неизвестная ошибка")
-        await message.reply(f"Пользователь {args[1]} телепортирован")
+        if user.tg_id != message.from_id:
+            await message.reply(f"Пользователь {args[1]} телепортирован")
+        else:
+            section_image = bot.user_subsection(user)
+            with bot.map_renderer.get_image_data(section_image) as image_data:
+                await bot.client.send_photo(
+                    caption=bot.user_controller_info(user),
+                    chat_id=message.chat.id,
+                    photo=types.InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
+                    reply_markup=markups.rover_controller(),
+                    parse_mode="Markdown"
+                )
         
         

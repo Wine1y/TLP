@@ -5,7 +5,7 @@
     "nick_used": "Sorry, this nickname is already used, please try again",
     "nick_too_long": "This nickname is too long, maximum nickname length - 10 symbols, please try again",
     "successful_sign_up": "In this bot, you can travel on a virtual planet using the energy of the sun, look for treasures buried by other participants, and dig your own, thus earning income from staking. All treasures are encrypted in the blockchain in such a way that after opening each cell, you can verify its contents. However, no one can open all the cells without being physically above it. Travel across the virtual planet, invite friends to replenish your energy reserves, dig for treasures and get tokens!",
-    "unkown_error": "Unfortunately, an unknown error occured, please try again",
+    "unknown_error": "Unfortunately, an unknown error occured, please try again",
     "no_user_error": "First you need to use the /start command",
     "energy": "Energy",
     "current_map_seed": "Current map seed - %seed%",
@@ -14,5 +14,7 @@
     "dig_not_on_sand": "You can only dig at sand",
     "confirm_dig": "Confirm your action",
     "dig_confirmed": "Dig",
+    "insufficient_funds": "Insufficient funds!\nYou have %balance% SDQ.",
+    "no_space_to_dig": "There is no space to dig",
     "cancel": "Cancel"
 }

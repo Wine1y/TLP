@@ -67,7 +67,7 @@ def set_state_handlers(bot: "SolarDriveBot"):
         if new_user is None:
             await bot.client.send_message(
                 message.chat.id,
-                bot.string(user_language, "unkown_error")
+                bot.string(user_language, "unknown_error")
             )
             return
         await state.finish()

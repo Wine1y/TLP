@@ -61,7 +61,7 @@ def dig_confirm(language: BotLanguage) -> InlineKeyboardMarkup:
     markup.add(
         InlineKeyboardButton(
             language.string("dig_confirmed"),
-            callback_data=CB_WIP.new()
+            callback_data=ROVER_DIG.new(status="confirmed")
         ),
         InlineKeyboardButton(
             language.string("cancel"),

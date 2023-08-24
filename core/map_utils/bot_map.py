@@ -1,8 +1,9 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from enum import Enum
+from random import choice
 
-from core.db import UserRepository
+from core.db import UserRepository, ChangedTile, ChangedTileRepository
 
 
 @dataclass
@@ -17,6 +18,7 @@ class MapTile(Enum):
     Stone=Tile(2)
     Mountains=Tile(3, walkable=False, can_fit_sand_pile=False)
     SandPile=Tile(4, walkable=False, can_fit_sand_pile=False)
+    GrainySand=Tile(5)
 
     @property
     def can_fit_sand_pile(self) -> bool:
@@ -32,8 +34,6 @@ class MapTile(Enum):
 
 _SAND_PILED_TILES = {
     MapTile.Water: MapTile.Sand,
-    MapTile.Sand: MapTile.SandPile,
-    MapTile.Stone: MapTile.SandPile,
 }
 
 class BotMap():
@@ -98,6 +98,17 @@ class BotMap():
         ]
         return BotMap(section_tiles, start_coordinates=[from_x, from_y], parent_map=self)
     
+    def set_changed_tile_at(
+        self,
+        x: int,
+        y: int,
+        tile: MapTile,
+        tiles_rep: ChangedTileRepository,
+        spawned_naturally: bool=False
+    ) -> bool:
+        self.set_tile_at(x, y, tile)
+        return tiles_rep.add(ChangedTile(tile.id, x, y, spawned_naturally=spawned_naturally))
+    
     def tile_at(self, x: int, y: int) -> MapTile:
         if x >= self.width or y >= self.height:
             raise RuntimeError(f"Invalid coordinates ({x}x{y}), for {self.width}x{self.height} map")
@@ -114,16 +125,7 @@ class BotMap():
         max_radius = max(self.width-cords[0], self.height-cords[1])
         rep = UserRepository()
         for radius in range(1, max_radius):
-            closest_siblings = [
-                (cords[0]-radius, cords[1]),        #L
-                (cords[0]+radius, cords[1]),        #R
-                (cords[0], cords[1]-radius),        #T
-                (cords[0], cords[1]+radius),        #B
-                (cords[0]-radius, cords[1]-radius), #LT
-                (cords[0]+radius, cords[1]-radius), #RT
-                (cords[0]+radius, cords[1]+radius), #RB
-                (cords[0]-radius, cords[1]+radius)  #LB
-            ]
+            closest_siblings = self._outlined_square_cords(cords, radius)
             for sibling_cords in closest_siblings:
                 if abs(sibling_cords[0]) > self.width or abs(sibling_cords[1]) > self.height:
                     continue
@@ -132,9 +134,43 @@ class BotMap():
                 return sibling_cords
         return None
     
+    def find_new_sandpile_pos(
+        self,
+        center_cords: List[int],
+        user_rep: UserRepository
+    ) -> Optional[List[int]]:
+        square_cords = self._outlined_square_cords(center_cords, radius=1)
+        candidates = [
+            cords
+            for cords in square_cords
+            if self.can_place_sand_pile(cords[0], cords[1], user_rep)
+        ]
+        if len(candidates) == 0:
+            return None
+        return choice(candidates)
+    
     def is_walkable(self, x: int, y: int, user_rep: UserRepository) -> bool:
         return self.tile_at(x, y).walkable and user_rep.get_by_coordinates(x, y) is None
     
+    def can_place_sand_pile(self, x: int, y: int, user_rep: UserRepository) -> bool:
+        return self.tile_at(x, y).can_fit_sand_pile and user_rep.get_by_coordinates(x, y) is None
+    
+    def _outlined_square_cords(
+        self,
+        center_cords: List[int],
+        radius: int=1
+    ) -> List[List[int]]:
+        return [
+                (center_cords[0]-radius, center_cords[1]),        #L
+                (center_cords[0]+radius, center_cords[1]),        #R
+                (center_cords[0], center_cords[1]-radius),        #T
+                (center_cords[0], center_cords[1]+radius),        #B
+                (center_cords[0]-radius, center_cords[1]-radius), #LT
+                (center_cords[0]+radius, center_cords[1]-radius), #RT
+                (center_cords[0]+radius, center_cords[1]+radius), #RB
+                (center_cords[0]-radius, center_cords[1]+radius)  #LB
+            ]
+
     def normalize_cords(self, cords: List[int]) -> List[int]:
         x, y = cords[0], cords[1]
         if x < 0:
@@ -148,4 +184,5 @@ class BotMap():
         return [x, y]
 
 def put_sand_pile(tile: MapTile) -> MapTile:
-    return MapTile(_SAND_PILED_TILES[tile])
+    sand_piled_tile = _SAND_PILED_TILES.get(tile)
+    return sand_piled_tile or MapTile.SandPile

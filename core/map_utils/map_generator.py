@@ -112,13 +112,12 @@ class PerlinMapGenerator(MapGenerator):
                 if bot_map.is_walkable(x, y, user_rep)
             ]
             for new_pile_cords in sample(available_coords, natural_piles_required):
-                pile = ChangedTile(
-                    MapTile.SandPile.id,
+                bot_map.set_changed_tile_at(
                     new_pile_cords[0],
                     new_pile_cords[1],
+                    MapTile.SandPile,
+                    tiles_rep,
                     spawned_naturally=True
                 )
-                if tiles_rep.add(pile):
-                    bot_map.set_tile_at(pile.x, pile.y, MapTile.SandPile)
         return bot_map
         
