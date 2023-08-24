@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from core.db import BaseModel
 
@@ -14,6 +15,7 @@ class User(BaseModel):
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
     energy = Column(Integer)
+    treasures = relationship("Treasure", back_populates="burried_by")
 
     def __init__(
         self,

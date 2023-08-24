@@ -16,5 +16,14 @@
     "dig_confirmed": "Dig",
     "insufficient_funds": "Insufficient funds!\nYou have %balance% SDQ.",
     "no_space_to_dig": "There is no space to dig",
-    "cancel": "Cancel"
+    "treasure_found": "Congratulations, you have found a treasure in the amount of %sdq_amount% SDQ !!!",
+    "treasure_not_found": "Excavation completed",
+    "cancel": "Cancel",
+    "back": "Back",
+    "take_treasure": "Pick up",
+    "leave_treasure": "Leave",
+    "bury_treasure": "Bury treasure",
+    "enter_treasure_amount": "Enter treasure amount in SQD",
+    "enter_treasure_amount_not_a_number": "Please enter the number of SDQ tokens you wish to bury",
+    "enter_treasure_amount_insufficient_funds": "Insufficient funds!\nYou have %balance% SDQ.\nEnter treasure amount in SQD"
 }

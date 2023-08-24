@@ -2,18 +2,17 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from os import getenv
 
-from core.db import User, UserRepository
-from core.bot import markups
-from core.bot.states import StartingForm
+from core.db import User, Treasure, UserRepository, TreasureRepository
+from core.bot import markups, states
 
 
 def set_state_handlers(bot: "SolarDriveBot"):
-    @bot.dp.message_handler(state=StartingForm.language)
+    @bot.dp.message_handler(state=states.StartingForm.language)
     async def got_language(message: types.Message, state: FSMContext):
         for lang_name, lang in bot.languages.items():
             if lang_name.lower() == message.text.lower():
                 await state.update_data(language=lang_name)
-                await state.set_state(StartingForm.nickname)
+                await state.set_state(states.StartingForm.nickname)
                 await bot.client.send_message(
                     message.chat.id,
                     bot.string(lang_name, "select_nick"),
@@ -26,7 +25,7 @@ def set_state_handlers(bot: "SolarDriveBot"):
             reply_markup=markups.languages_markup(bot.languages)
         )
     
-    @bot.dp.message_handler(state=StartingForm.nickname)
+    @bot.dp.message_handler(state=states.StartingForm.nickname)
     async def got_nickname(message: types.Message, state: FSMContext):
         data = await state.get_data()
         user_language = data["language"]
@@ -85,12 +84,44 @@ def set_state_handlers(bot: "SolarDriveBot"):
         await sdq_msg.pin()
         new_user.sdq_msg_id = sdq_msg.message_id
         rep.commit()
-        section_image = bot.user_subsection(new_user)
-        with bot.map_renderer.get_image_data(section_image) as image_data:
-            await bot.client.send_photo(
-                caption=bot.user_controller_info(new_user),
-                chat_id=message.chat.id,
-                photo=types.InputFile(image_data, filename=f"{new_user.x}x{new_user.y}.png"),
-                reply_markup=markups.rover_controller(),
-                parse_mode="Markdown"
+        await bot.send_playground_message(new_user, message.chat.id)
+    
+    @bot.dp.message_handler(state=states.TreasureBuryForm.amount)
+    async def got_amount(message: types.Message, state: FSMContext):
+        user_rep = UserRepository()
+        user = user_rep.get_by_tg_id(message.from_id)
+        if user is None:
+            await bot.client.send_message(
+                message.chat.id,
+                bot.string("English", "no_user_error"),
+                reply_markup=markups.treasure_bury_back(bot.languages[user.language])
             )
+            return
+        try:
+            amount = int(message.text)
+        except ValueError:
+            await bot.client.send_message(
+                message.chat.id,
+                bot.string(user.language, "enter_treasure_amount_not_a_number"),
+                reply_markup=markups.treasure_bury_back(bot.languages[user.language])
+            )
+            return
+        if amount > user.sdq_balance:
+            await bot.client.send_message(
+                message.chat.id,
+                bot.string(user.language, "enter_treasure_amount_insufficient_funds", balance=user.sdq_balance),
+                reply_markup=markups.treasure_bury_back(bot.languages[user.language])
+            )
+            return
+        treasure_rep = TreasureRepository()
+        treasure = Treasure(user.x, user.y, amount, user.id)
+        if not treasure_rep.add(treasure):
+            await bot.client.send_message(
+                message.chat.id,
+                bot.string(user.language, "unknown_error"),
+                reply_markup=markups.treasure_bury_back(bot.languages[user.language])
+            )
+            return
+        await bot.update_user_balance(user, user_rep, user.sdq_balance-amount)
+        await state.finish()
+        await bot.send_playground_message(user, message.chat.id)

@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from typing import List, Dict, Any
+from aiogram.types import Message, InlineKeyboardMarkup, InputMediaPhoto, InputFile
+from typing import List, Dict, Any, Optional
 
 from core.bot.message_handlers import set_message_handlers
 from core.bot import markups
@@ -82,3 +83,32 @@ class SolarDriveBot():
                 reply_markup=markups.sqd_msg_markup(self.languages[user.language])
             )
         return True
+    
+    async def update_playground_message(
+        self,
+        message: Message,
+        user: User,
+        caption: str,
+        markup: Optional[InlineKeyboardMarkup]=None
+    ):
+        section_image = self.user_subsection(user)
+        with self.map_renderer.get_image_data(section_image) as image_data:
+            await message.edit_media(
+                InputMediaPhoto(
+                    InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
+                    caption=caption,
+                    parse_mode="Markdown"
+                ),
+                reply_markup=markup or markups.rover_controller()
+            )
+    
+    async def send_playground_message(self, user: User, chat_id: int):
+        section_image = self.user_subsection(user)
+        with self.map_renderer.get_image_data(section_image) as image_data:
+            await self.client.send_photo(
+                caption=self.user_controller_info(user),
+                chat_id=chat_id,
+                photo=InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
+                reply_markup=markups.rover_controller(),
+                parse_mode="Markdown"
+            )

@@ -10,15 +10,16 @@ from core.db import UserRepository, ChangedTile, ChangedTileRepository
 class Tile:
     id: int
     walkable: bool=True
+    diggable: bool=False
     can_fit_sand_pile: bool=True
 
 class MapTile(Enum):
     Water=Tile(0, walkable=False)
-    Sand=Tile(1)
+    Sand=Tile(1, diggable=True)
     Stone=Tile(2)
     Mountains=Tile(3, walkable=False, can_fit_sand_pile=False)
     SandPile=Tile(4, walkable=False, can_fit_sand_pile=False)
-    GrainySand=Tile(5)
+    GrainySand=Tile(5, diggable=True)
 
     @property
     def can_fit_sand_pile(self) -> bool:
@@ -27,6 +28,10 @@ class MapTile(Enum):
     @property
     def walkable(self) -> bool:
         return self.value.walkable
+    
+    @property
+    def diggable(self) -> bool:
+        return self.value.diggable
 
     @property
     def id(self) -> int:

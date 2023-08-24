@@ -69,3 +69,42 @@ def dig_confirm(language: BotLanguage) -> InlineKeyboardMarkup:
         )
     )
     return markup
+
+def treasure_found(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("take_treasure"),
+            callback_data=CB_WIP.new()
+            #ROVER_DIG.new(status="treasure_taken")
+        ),
+        InlineKeyboardButton(
+            language.string("leave_treasure"),
+            callback_data=ROVER_DIG.new(status="canceled")
+        )
+    )
+    return markup
+
+def treasure_not_found(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("bury_treasure"),
+            callback_data=ROVER_DIG.new(status="treasure_bury")
+        ),
+        InlineKeyboardButton(
+            language.string("back"),
+            callback_data=ROVER_DIG.new(status="canceled")
+        )
+    )
+    return markup
+
+def treasure_bury_back(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("back"),
+            callback_data=ROVER_DIG.new(status="canceled_new_message")
+        )
+    )
+    return markup

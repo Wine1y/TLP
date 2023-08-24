@@ -16,5 +16,14 @@
     "dig_confirmed": "Копать",
     "insufficient_funds": "Недостаточно средств!\nНа вашем балансе %balance% SDQ.",
     "no_space_to_dig": "Здесь нет места, чтобы копать",
-    "cancel": "Отмена"
+    "treasure_found": "Поздравляем, вы нашли клад в размере %sdq_amount% SDQ !!!",
+    "treasure_not_found": "Раскопка завершена",
+    "cancel": "Отмена",
+    "back": "Назад",
+    "take_treasure": "Забрать",
+    "leave_treasure": "Оставить",
+    "bury_treasure": "Закопать клад",
+    "enter_treasure_amount": "Введите размер клада в SQD",
+    "enter_treasure_amount_not_a_number": "Пожалуйста, введите число токенов SDQ, которые вы хотите закопать",
+    "enter_treasure_amount_insufficient_funds": "Недостаточно средств!\nНа вашем балансе %balance% SDQ.\nВведите размер клада в SQD"
 }

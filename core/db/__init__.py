@@ -17,5 +17,7 @@ def get_session():
 from core.db.models.base import BASE, BaseModel
 from core.db.models.user import User
 from core.db.models.changed_tile import ChangedTile
+from core.db.models.treasure import Treasure
 from core.db.repositories.user import UserRepository
 from core.db.repositories.changed_tile import ChangedTileRepository
+from core.db.repositories.treasure import TreasureRepository

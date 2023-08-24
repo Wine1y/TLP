@@ -49,15 +49,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user is None:
             await message.reply(bot.string("English", "no_user_error"))
             return
-        section_image = bot.user_subsection(user)
-        with bot.map_renderer.get_image_data(section_image) as image_data:
-            await bot.client.send_photo(
-                caption=bot.user_controller_info(user),
-                chat_id=message.chat.id,
-                photo=types.InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
-                reply_markup=markups.rover_controller(),
-                parse_mode="Markdown"
-            )
+        await bot.send_playground_message(user, message.chat.id)
     
     @bot.dp.message_handler(commands=["start"])
     async def cmd_start(message: types.Message, state: FSMContext):
@@ -96,14 +88,4 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user.tg_id != message.from_id:
             await message.reply(f"Пользователь {args[1]} телепортирован")
         else:
-            section_image = bot.user_subsection(user)
-            with bot.map_renderer.get_image_data(section_image) as image_data:
-                await bot.client.send_photo(
-                    caption=bot.user_controller_info(user),
-                    chat_id=message.chat.id,
-                    photo=types.InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
-                    reply_markup=markups.rover_controller(),
-                    parse_mode="Markdown"
-                )
-        
-        
+            await bot.send_playground_message(user, message.chat.id)
