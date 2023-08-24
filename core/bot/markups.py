@@ -75,8 +75,7 @@ def treasure_found(language: BotLanguage) -> InlineKeyboardMarkup:
     markup.add(
         InlineKeyboardButton(
             language.string("take_treasure"),
-            callback_data=CB_WIP.new()
-            #ROVER_DIG.new(status="treasure_taken")
+            callback_data=ROVER_DIG.new(status="treasure_taken")
         ),
         InlineKeyboardButton(
             language.string("leave_treasure"),

@@ -35,11 +35,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if not rep.commit():
             await query.answer(bot.string(user.language, "unknown_error"))
             return
-        await bot.update_playground_message(
-            query.message,
-            user,
-            bot.user_controller_info(user)
-        )
+        await bot.update_playground_message(query.message, user)
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="waiting"))
     async def dig_handler(query: CallbackQuery):
@@ -138,6 +134,24 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="canceled_new_message"))
     async def treasure_bury_canceled_expired(query: CallbackQuery, state: FSMContext):
         await query.answer()
+    
+    @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="treasure_taken"))
+    async def take_treasure(query: CallbackQuery):
+        user_rep, treasure_rep = UserRepository(), TreasureRepository()
+        user = user_rep.get_by_tg_id(query.from_user.id)
+        if user is None:
+            await query.answer(bot.string("English", "no_user_error"))
+            return
+        treasure = treasure_rep.get_by_coordinates(user.x, user.y)
+        if treasure is not None:
+            balance_added = await bot.update_user_balance(user, user_rep, user.sdq_balance+treasure.sdq_amount)
+            treasure_deleted = treasure_rep.delete(treasure)
+            if balance_added and treasure_deleted:
+                await bot.update_playground_message(query.message, user)
+                return
+
+        await query.answer(bot.string(user.language, "unknown_error"))
+        await bot.update_playground_message(query.message, user)
 
     @bot.dp.callback_query_handler(markups.CB_WIP.filter())
     async def wip_handler(query: CallbackQuery):

@@ -22,6 +22,14 @@ class DatabaseRepository(ABC):
         except (IntegrityError, ProgrammingError, OperationalError):
             return False
         
+    def delete(self, obj: BaseModel) -> bool:
+        try:
+            self.session.delete(obj)
+            self.session.commit()
+            return True
+        except (IntegrityError, ProgrammingError, OperationalError):
+            return False
+        
     def commit(self) -> bool:
         try:
             self.session.commit()

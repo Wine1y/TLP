@@ -88,7 +88,7 @@ class SolarDriveBot():
         self,
         message: Message,
         user: User,
-        caption: str,
+        caption: Optional[str]=None,
         markup: Optional[InlineKeyboardMarkup]=None
     ):
         section_image = self.user_subsection(user)
@@ -96,7 +96,7 @@ class SolarDriveBot():
             await message.edit_media(
                 InputMediaPhoto(
                     InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
-                    caption=caption,
+                    caption=caption or self.user_controller_info(user),
                     parse_mode="Markdown"
                 ),
                 reply_markup=markup or markups.rover_controller()
