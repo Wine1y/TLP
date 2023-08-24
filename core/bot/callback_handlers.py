@@ -128,7 +128,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         user_rep = UserRepository()
         user = user_rep.get_by_tg_id(query.from_user.id)
         await state.finish()
-        await bot.send_playground_message(user, query.message.chat.id)
+        await bot.send_playground_message(user, query.message.chat.id, user_rep)
         await query.answer()
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="canceled_new_message"))

@@ -49,7 +49,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user is None:
             await message.reply(bot.string("English", "no_user_error"))
             return
-        await bot.send_playground_message(user, message.chat.id)
+        await bot.send_playground_message(user, message.chat.id, rep)
     
     @bot.dp.message_handler(commands=["start"])
     async def cmd_start(message: types.Message, state: FSMContext):
@@ -88,4 +88,4 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user.tg_id != message.from_id:
             await message.reply(f"Пользователь {args[1]} телепортирован")
         else:
-            await bot.send_playground_message(user, message.chat.id)
+            await bot.send_playground_message(user, message.chat.id, rep)

@@ -84,7 +84,7 @@ def set_state_handlers(bot: "SolarDriveBot"):
         await sdq_msg.pin()
         new_user.sdq_msg_id = sdq_msg.message_id
         rep.commit()
-        await bot.send_playground_message(new_user, message.chat.id)
+        await bot.send_playground_message(new_user, message.chat.id, rep)
     
     @bot.dp.message_handler(state=states.TreasureBuryForm.amount)
     async def got_amount(message: types.Message, state: FSMContext):
@@ -124,4 +124,4 @@ def set_state_handlers(bot: "SolarDriveBot"):
             return
         await bot.update_user_balance(user, user_rep, user.sdq_balance-amount)
         await state.finish()
-        await bot.send_playground_message(user, message.chat.id)
+        await bot.send_playground_message(user, message.chat.id, user_rep)

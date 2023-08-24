@@ -102,13 +102,22 @@ class SolarDriveBot():
                 reply_markup=markup or markups.rover_controller()
             )
     
-    async def send_playground_message(self, user: User, chat_id: int):
+    async def send_playground_message(
+        self,
+        user: User,
+        chat_id: int,
+        user_rep: UserRepository
+    ):
         section_image = self.user_subsection(user)
         with self.map_renderer.get_image_data(section_image) as image_data:
-            await self.client.send_photo(
+            new_msg = await self.client.send_photo(
                 caption=self.user_controller_info(user),
                 chat_id=chat_id,
                 photo=InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
                 reply_markup=markups.rover_controller(),
                 parse_mode="Markdown"
             )
+            if user.playground_msg_id is not None:
+                await self.client.delete_message(chat_id, user.playground_msg_id)
+            user.playground_msg_id = new_msg.message_id
+            user_rep.commit()

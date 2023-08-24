@@ -11,6 +11,7 @@ class User(BaseModel):
     language = Column(String, nullable=False)
     tg_id = Column(Integer, nullable=False, unique=True)
     sdq_msg_id = Column(Integer, nullable=True)
+    playground_msg_id = Column(Integer, nullable=True)
     sdq_balance = Column(Integer, default=100)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
@@ -30,6 +31,7 @@ class User(BaseModel):
         self.username = username
         self.tg_id = tg_id
         self.sqd_msg_id=None
+        self.playground_msg_id=None
         self.sqd_balance = sdq_balance
         self.language = language
         self.x = x
