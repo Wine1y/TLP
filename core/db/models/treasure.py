@@ -11,7 +11,7 @@ class Treasure(BaseModel):
     y = Column(Integer, nullable=False)
     sdq_amount = Column(Integer, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
-    burried_by = relationship("User", back_populates="treasures")
+    buried_by = relationship("User", back_populates="treasures")
 
     def __init__(self, x: int, y: int, sdq_amount: int, owner_id: int):
         self.x = x

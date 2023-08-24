@@ -15,7 +15,7 @@ class User(BaseModel):
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
     energy = Column(Integer)
-    treasures = relationship("Treasure", back_populates="burried_by")
+    treasures = relationship("Treasure", back_populates="buried_by")
 
     def __init__(
         self,

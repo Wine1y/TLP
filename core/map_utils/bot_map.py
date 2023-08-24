@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from random import choice
 
-from core.db import UserRepository, ChangedTile, ChangedTileRepository
+from core.db import UserRepository, ChangedTile, ChangedTileRepository, TreasureRepository
 
 
 @dataclass
@@ -142,13 +142,14 @@ class BotMap():
     def find_new_sandpile_pos(
         self,
         center_cords: List[int],
-        user_rep: UserRepository
+        user_rep: UserRepository,
+        treasure_rep: TreasureRepository
     ) -> Optional[List[int]]:
         square_cords = self._outlined_square_cords(center_cords, radius=1)
         candidates = [
             cords
             for cords in square_cords
-            if self.can_place_sand_pile(cords[0], cords[1], user_rep)
+            if self.can_place_sand_pile(cords[0], cords[1], user_rep, treasure_rep)
         ]
         if len(candidates) == 0:
             return None
@@ -157,8 +158,17 @@ class BotMap():
     def is_walkable(self, x: int, y: int, user_rep: UserRepository) -> bool:
         return self.tile_at(x, y).walkable and user_rep.get_by_coordinates(x, y) is None
     
-    def can_place_sand_pile(self, x: int, y: int, user_rep: UserRepository) -> bool:
-        return self.tile_at(x, y).can_fit_sand_pile and user_rep.get_by_coordinates(x, y) is None
+    def can_place_sand_pile(
+        self,
+        x: int,
+        y: int,
+        user_rep: UserRepository,
+        treasure_rep: TreasureRepository
+    ) -> bool:
+        tile_fits = self.tile_at(x, y).can_fit_sand_pile
+        no_user = user_rep.get_by_coordinates(x, y) is None
+        no_treasure = treasure_rep.get_by_coordinates(x, y) is None
+        return tile_fits and no_user and no_treasure
     
     def _outlined_square_cords(
         self,

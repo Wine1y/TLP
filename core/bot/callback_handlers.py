@@ -43,15 +43,15 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="waiting"))
     async def dig_handler(query: CallbackQuery):
-        rep = UserRepository()
-        user = rep.get_by_tg_id(query.from_user.id)
+        user_rep, treasure_rep = UserRepository(), TreasureRepository()
+        user = user_rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
         if not bot.bot_map.tile_at(user.x, user.y).diggable:
             await query.answer(bot.string(user.language, "dig_not_on_sand"))
             return
-        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], rep)
+        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep, treasure_rep)
         if new_sandpile_pos is None:
             await query.answer(bot.string(user.language, "no_space_to_dig"))
             return
@@ -76,6 +76,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="confirmed"))
     async def dig_confirmed(query: CallbackQuery):
         user_rep, tiles_rep = UserRepository(), ChangedTileRepository()
+        treasure_rep = TreasureRepository()
         user = user_rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
@@ -83,7 +84,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user.sdq_balance < 1:
             await query.answer(bot.string(user.language, "insufficient_funds", balance=user.sdq_balance))
             return
-        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep)
+        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep, treasure_rep)
         if new_sandpile_pos is None:
             await query.answer(bot.string(user.language, "no_space_to_dig"))
             return
