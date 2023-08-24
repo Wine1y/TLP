@@ -2,6 +2,7 @@ from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Message, InlineKeyboardMarkup, InputMediaPhoto, InputFile
 from typing import List, Dict, Any, Optional
+from PIL import Image
 
 from core.bot.message_handlers import set_message_handlers
 from core.bot import markups
@@ -60,8 +61,8 @@ class SolarDriveBot():
     def string(self, language: str, string_id: str, **values: Any) -> str:
         return self.languages[language].string(string_id, **values)
     
-    def user_subsection(self, user: User) -> BotMap:
-        return self.map_renderer.DrawMapSubsection(
+    def user_subsection(self, user: User) -> Image.Image:
+        return self.map_renderer.draw_map_subsection(
             self.bot_map,
             [user.x, user.y],
             self.section_size,
@@ -108,14 +109,26 @@ class SolarDriveBot():
         chat_id: int,
         user_rep: UserRepository
     ):
+        background_image = self.map_renderer.get_map_background(self.section_size, self.section_size)
         section_image = self.user_subsection(user)
-        with self.map_renderer.get_image_data(section_image) as image_data:
+        with self.map_renderer.get_image_data(background_image) as image_data:
             new_msg = await self.client.send_photo(
                 caption=self.user_controller_info(user),
                 chat_id=chat_id,
                 photo=InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
                 reply_markup=markups.rover_controller(),
                 parse_mode="Markdown"
+            )
+            if new_msg is None:
+                return
+        with self.map_renderer.get_image_data(section_image) as image_data:
+            await new_msg.edit_media(
+                InputMediaPhoto(
+                    InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
+                    caption=self.user_controller_info(user),
+                    parse_mode="Markdown"
+                ),
+                reply_markup=markups.rover_controller()
             )
             if user.playground_msg_id is not None:
                 await self.client.delete_message(chat_id, user.playground_msg_id)

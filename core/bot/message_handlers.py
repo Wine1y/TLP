@@ -15,7 +15,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user is None:
             await message.reply(bot.string("English", "no_user_error"))
             return
-        map_image = bot.map_renderer.DrawMap(bot.bot_map, draw_players=False)
+        map_image = bot.map_renderer.draw_map(bot.bot_map, draw_players=False)
         with bot.map_renderer.get_image_data(map_image) as image_data:
             await bot.client.send_document(
                 caption=bot.string(user.language, "current_map_seed", seed=bot.map_seed),
@@ -34,7 +34,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
             bot.map_size,
             add_changed_tiles=False
         )
-        map_img = bot.map_renderer.DrawMap(random_map, draw_players=False)
+        map_img = bot.map_renderer.draw_map(random_map, draw_players=False)
         with bot.map_renderer.get_image_data(map_img) as image_data: 
             await bot.client.send_document(
                 chat_id=message.chat.id,

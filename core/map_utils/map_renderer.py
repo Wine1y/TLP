@@ -10,10 +10,13 @@ from core.db import User, UserRepository
 
 class MapRenderer(ABC):
 
-    def DrawMap(self, bot_map: BotMap, draw_players: bool=True) -> Image.Image:
+    def get_map_background(self, map_w: int, map_h: int) -> Image.Image:
         ...
 
-    def DrawMapSubsection(
+    def draw_map(self, bot_map: BotMap, draw_players: bool=True) -> Image.Image:
+        ...
+
+    def draw_map_subsection(
         self,
         bot_map: BotMap,
         center_cords: List[int],
@@ -24,7 +27,7 @@ class MapRenderer(ABC):
         if len(center_cords) != 2:
             raise RuntimeError("Invalid center coordinates, should be [width, height]")
         bbox = bot_map.calc_subsection_bbox(center_cords, section_w, section_h)
-        return self.DrawMap(
+        return self.draw_map(
             bot_map.get_subsection(bbox[0], bbox[2], bbox[1], bbox[3]),
             draw_players
         )
@@ -51,7 +54,10 @@ class StaticRenderer(MapRenderer):
     }
     ROVER_IMAGE = Image.open(path.join("assets", "textures", "rover.png"))
     
-    def DrawMap(self, bot_map: BotMap, draw_players: bool=True) -> Image.Image:
+    def get_map_background(self, map_w: int, map_h: int) -> Image.Image:
+        return Image.new("RGBA", (map_w*self.TILE_SIZE, map_h*self.TILE_SIZE), (118, 118, 118))
+
+    def draw_map(self, bot_map: BotMap, draw_players: bool=True) -> Image.Image:
         image = Image.new("RGBA", (self.TILE_SIZE*bot_map.width, self.TILE_SIZE*bot_map.height))
         for y in range(bot_map.height):
             for x in range(bot_map.width):
@@ -100,8 +106,8 @@ class StaticRenderer(MapRenderer):
         )
 
 class StaticDebugRenderer(StaticRenderer):
-    def DrawMap(self, bot_map: BotMap, draw_rover: bool=True) -> Image.Image:
-        image = super().DrawMap(bot_map, draw_rover)
+    def draw_map(self, bot_map: BotMap, draw_rover: bool=True) -> Image.Image:
+        image = super().draw_map(bot_map, draw_rover)
         draw = ImageDraw.ImageDraw(image)
         for y in range(bot_map.height):
             for x in range(bot_map.width):
