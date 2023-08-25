@@ -72,7 +72,7 @@ class SolarDriveBot():
         )
     
     def user_controller_info(self, user: User) -> str:
-        return f"X: *{user.x}* Y: *{user.y}*\n{self.string(user.language, 'energy')}: *{user.energy}%*"
+        return f"X: *{user.x}* Y: *{user.y}*\n{self.string(user.language, 'energy')}: *{round(user.energy)}%*"
     
     async def update_user_balance(self, user: User, rep: UserRepository, new_balance: int) -> bool:
         user.sdq_balance = new_balance
@@ -91,9 +91,8 @@ class SolarDriveBot():
         now = datetime.utcnow()
         if user.last_energy_refresh is not None:
             seconds_passed = (now-datetime.fromtimestamp(user.last_energy_refresh)).seconds
-            energy_charged = 0.1 * seconds_passed * uniform(0.1, 1)
-            print(f"{seconds_passed} seconds passed, + {energy_charged} energy")
-            user.energy = min(round(user.energy+energy_charged), 100)
+            energy_charged = 0.001 * seconds_passed * uniform(0.1, 1)
+            user.energy = min(round(user.energy+energy_charged, 4), 100)
         user.last_energy_refresh = round(now.timestamp())
         return rep.commit()
 

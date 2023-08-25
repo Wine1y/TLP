@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.orm import relationship
 
 from core.db import BaseModel
@@ -16,7 +16,7 @@ class User(BaseModel):
     sdq_balance = Column(Integer, default=100)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
-    energy = Column(Integer)
+    energy = Column(Float)
     treasures = relationship("Treasure", back_populates="buried_by")
 
     def __init__(

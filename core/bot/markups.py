@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from aiogram.utils.callback_data import CallbackData
 from aiogram.types import (InlineKeyboardMarkup, InlineKeyboardButton,
                            ReplyKeyboardMarkup, KeyboardButton)
@@ -9,12 +9,13 @@ from core.bot.language import BotLanguage
 
 ROVER_MOVE = CallbackData("move", "direction")
 ROVER_DIG = CallbackData("dig", "status")
+ROVER_REFRESH = CallbackData("refresh", "count")
 CB_WIP = CallbackData("wip")
 
 def remove_keyboard() -> ReplyKeyboardRemove:
     return ReplyKeyboardRemove()
 
-def rover_controller() -> InlineKeyboardMarkup:
+def rover_controller(refresh_count: Optional[int]=None) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(row_width=3)
     markup.add(
         InlineKeyboardButton(" ", callback_data=CB_WIP.new()),
@@ -25,7 +26,7 @@ def rover_controller() -> InlineKeyboardMarkup:
         InlineKeyboardButton("➡️", callback_data=ROVER_MOVE.new(direction="right")),
         InlineKeyboardButton(" ", callback_data=CB_WIP.new()),
         InlineKeyboardButton("⬇️", callback_data=ROVER_MOVE.new(direction="bottom")),
-        InlineKeyboardButton(" ", callback_data=CB_WIP.new())
+        InlineKeyboardButton("↻", callback_data=ROVER_REFRESH.new(count=refresh_count or 1))
     )
     return markup
 
