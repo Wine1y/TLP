@@ -13,6 +13,7 @@ ROVER_CANCEL = CallbackData("cancel", "new_message")
 ROVER_REFRESH = CallbackData("refresh", "count")
 ROVER_MOVE_PILE = CallbackData("move_pile", "d_x", "d_y")
 ROVER_INVITE_FRIENDS = CallbackData("invite_ref")
+ROVER_START = CallbackData("start_pg")
 CB_WIP = CallbackData("wip")
 
 def remove_keyboard() -> ReplyKeyboardRemove:
@@ -146,6 +147,16 @@ def invitation_back(language: BotLanguage) -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             language.string("back"),
             callback_data=ROVER_CANCEL.new(new_message="False")
+        )
+    )
+    return markup
+
+def start_continue(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("continue"),
+            callback_data=ROVER_START.new()
         )
     )
     return markup

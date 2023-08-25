@@ -30,5 +30,6 @@
     "pile_move_confirmed": "Move",
     "insufficient_energy": "❗ You don't have enough energy to complete this action!\nInvite your friends to replenish your energy reserves quickly!\nEach friend you invite will give you 100% charge and 1 SDQ token!",
     "invite_friends": "Invite friends",
-    "ref_invitation_text": "I would like to invite you to play Solar Drive Quest!\nJourney across a virtual planet, searching for treasures and tokens buried in them! All treasures are encrypted in the blockchain and can only be checked by the participant who is on the desired cell.\nVia my personal link +50 SDQ tokens!\nhttps://t.me/solar_drive_quest_bot"
+    "ref_invitation_text": "I would like to invite you to play Solar Drive Quest!\nJourney across a virtual planet, searching for treasures and tokens buried in them! All treasures are encrypted in the blockchain and can only be checked by the participant who is on the desired cell.\nVia my personal link +50 SDQ tokens!\nhttps://t.me/solar_drive_quest_bot",
+    "continue": "Continue"
 }

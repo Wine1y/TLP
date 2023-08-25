@@ -226,7 +226,17 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         markup = markups.rover_controller(refresh_count=int(callback_data["count"])+1)
         bot.refresh_user_energy(user, user_rep)
         await bot.update_playground_message(query.message, user, markup=markup)
-
+    
+    @bot.dp.callback_query_handler(markups.ROVER_START.filter())
+    async def start_handler(query: CallbackQuery):
+        user_rep = UserRepository()
+        user = user_rep.get_by_tg_id(query.from_user.id)
+        if user is None:
+            await query.answer(bot.string("English", "no_user_error"))
+            return
+        await query.answer()
+        await bot.send_playground_message(user, query.message.chat.id, user_rep)
+        
     @bot.dp.callback_query_handler(markups.CB_WIP.filter())
     async def wip_handler(query: CallbackQuery):
         await query.answer()

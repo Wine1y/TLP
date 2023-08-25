@@ -71,10 +71,6 @@ def set_state_handlers(bot: "SolarDriveBot"):
             )
             return
         await state.finish()
-        await bot.client.send_message(
-            message.chat.id,
-            bot.string(user_language, "successful_sign_up"),
-            reply_markup=markups.remove_keyboard())
         sdq_msg = await bot.client.send_message(
             message.chat.id,
             bot.string(user_language, "sdq_msg", balance=new_user.sdq_balance),
@@ -83,9 +79,14 @@ def set_state_handlers(bot: "SolarDriveBot"):
         await sdq_msg.pin()
         if new_user.sdq_msg_id is not None:
             await bot.client.unpin_chat_message(message.chat.id, new_user.sdq_msg_id)
+        await bot.client.send_message(
+            message.chat.id,
+            bot.string(user_language, "successful_sign_up"),
+            reply_markup=markups.start_continue(bot.languages[user_language])
+        )
         new_user.sdq_msg_id = sdq_msg.message_id
         rep.commit()
-        await bot.send_playground_message(new_user, message.chat.id, rep)
+
     
     @bot.dp.message_handler(state=states.TreasureBuryForm.amount)
     async def got_amount(message: types.Message, state: FSMContext):
