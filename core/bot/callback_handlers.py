@@ -25,10 +25,18 @@ def set_callback_handlers(bot: "SolarDriveBot"):
             return
         delta = _MOVE_DELTAS[callback_data["direction"]]
         new_cords = bot.bot_map.normalize_cords([user.x+delta[0], user.y+delta[1]])
-        if not bot.bot_map.tile_at(new_cords[0], new_cords[1]).walkable:
-            await query.answer()
-            return
-        if rep.get_by_coordinates(new_cords[0], new_cords[1]) is not None:
+        if bot.bot_map.tile_at(new_cords[0], new_cords[1]) == MapTile.SandPile:
+            new_pile_cords = bot.bot_map.normalize_cords([new_cords[0]+delta[0], new_cords[1]+delta[1]])
+            if not bot.bot_map.can_place_sand_pile(new_pile_cords[0], new_pile_cords[1], rep):
+                await query.answer()
+                return
+            await bot.update_playground_message(
+                query.message,
+                user,
+                caption=bot.string(user.language, "confirm_pile_move"),
+                markup=markups.pile_move_confirm(bot.languages[user.language], delta)
+            )
+        if not bot.bot_map.is_walkable(new_cords[0], new_cords[1], rep):
             await query.answer()
             return
         user.x, user.y = new_cords[0], new_cords[1]
@@ -41,7 +49,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="waiting"))
     async def dig_handler(query: CallbackQuery):
-        user_rep, treasure_rep = UserRepository(), TreasureRepository()
+        user_rep = UserRepository()
         user = user_rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
@@ -49,7 +57,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if not bot.bot_map.tile_at(user.x, user.y).diggable:
             await query.answer(bot.string(user.language, "dig_not_on_sand"))
             return
-        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep, treasure_rep)
+        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep)
         if new_sandpile_pos is None:
             await query.answer(bot.string(user.language, "no_space_to_dig"))
             return
@@ -58,7 +66,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
             reply_markup=markups.dig_confirm(bot.languages[user.language])
         )
     
-    @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="canceled"))
+    @bot.dp.callback_query_handler(markups.ROVER_CANCEL.filter(new_message="False"))
     async def dig_canceled(query: CallbackQuery):
         rep = UserRepository()
         user = rep.get_by_tg_id(query.from_user.id)
@@ -71,7 +79,6 @@ def set_callback_handlers(bot: "SolarDriveBot"):
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="confirmed"))
     async def dig_confirmed(query: CallbackQuery):
         user_rep, tiles_rep = UserRepository(), ChangedTileRepository()
-        treasure_rep = TreasureRepository()
         user = user_rep.get_by_tg_id(query.from_user.id)
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
@@ -79,7 +86,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user.sdq_balance < 1:
             await query.answer(bot.string(user.language, "insufficient_funds", balance=user.sdq_balance))
             return
-        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep, treasure_rep)
+        new_sandpile_pos = bot.bot_map.find_new_sandpile_pos([user.x, user.y], user_rep)
         if new_sandpile_pos is None:
             await query.answer(bot.string(user.language, "no_space_to_dig"))
             return
@@ -120,7 +127,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         await state.set_state(states.TreasureBuryForm.amount)
 
     @bot.dp.callback_query_handler(
-        markups.ROVER_DIG.filter(status="canceled_new_message"),
+        markups.ROVER_CANCEL.filter(new_message="True"),
         state=states.TreasureBuryForm
     )
     async def treasure_bury_canceled(query: CallbackQuery, state: FSMContext):
@@ -130,7 +137,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         await bot.send_playground_message(user, query.message.chat.id, user_rep)
         await query.answer()
     
-    @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="canceled_new_message"))
+    @bot.dp.callback_query_handler(markups.ROVER_CANCEL.filter(new_message="True"))
     async def treasure_bury_canceled_expired(query: CallbackQuery, state: FSMContext):
         await query.answer()
     
@@ -152,6 +159,30 @@ def set_callback_handlers(bot: "SolarDriveBot"):
 
         await query.answer(bot.string(user.language, "unknown_error"))
         bot.refresh_user_energy(user, user_rep)
+        await bot.update_playground_message(query.message, user)
+    
+    @bot.dp.callback_query_handler(markups.ROVER_MOVE_PILE.filter())
+    async def move_pile(query: CallbackQuery, callback_data: Dict[str, str]):
+        user_rep, tile_rep = UserRepository(), ChangedTileRepository()
+        user = user_rep.get_by_tg_id(query.from_user.id)
+        if user is None:
+            await query.answer(bot.string("English", "no_user_error"))
+            return
+        delta_x, delta_y = int(callback_data["d_x"]), int(callback_data["d_y"])
+        pile_pos = bot.bot_map.normalize_cords([user.x+delta_x, user.y+delta_y])
+        new_pile_pos = bot.bot_map.normalize_cords([pile_pos[0]+delta_x, pile_pos[1]+delta_y])
+
+        bot.bot_map.set_changed_tile_at(
+            pile_pos[0], pile_pos[1],
+            MapTile.GrainySand, tile_rep
+        )
+        bot.bot_map.set_changed_tile_at(
+            new_pile_pos[0], new_pile_pos[1],
+            MapTile.SandPile, tile_rep
+        )
+        bot.update_user_energy(user, user_rep, user.energy-10)
+        user.x, user.y = pile_pos[0], pile_pos[1]
+        user_rep.commit()
         await bot.update_playground_message(query.message, user)
 
     @bot.dp.callback_query_handler(markups.ROVER_REFRESH.filter())

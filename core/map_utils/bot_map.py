@@ -143,13 +143,12 @@ class BotMap():
         self,
         center_cords: List[int],
         user_rep: UserRepository,
-        treasure_rep: TreasureRepository
     ) -> Optional[List[int]]:
         square_cords = self._outlined_square_cords(center_cords, radius=1)
         candidates = [
             cords
             for cords in square_cords
-            if self.can_place_sand_pile(cords[0], cords[1], user_rep, treasure_rep)
+            if self.can_place_sand_pile(cords[0], cords[1], user_rep)
         ]
         if len(candidates) == 0:
             return None
@@ -163,12 +162,10 @@ class BotMap():
         x: int,
         y: int,
         user_rep: UserRepository,
-        treasure_rep: TreasureRepository
     ) -> bool:
         tile_fits = self.tile_at(x, y).can_fit_sand_pile
         no_user = user_rep.get_by_coordinates(x, y) is None
-        no_treasure = treasure_rep.get_by_coordinates(x, y) is None
-        return tile_fits and no_user and no_treasure
+        return tile_fits and no_user
     
     def _outlined_square_cords(
         self,
@@ -176,14 +173,14 @@ class BotMap():
         radius: int=1
     ) -> List[List[int]]:
         return [
-                (center_cords[0]-radius, center_cords[1]),        #L
-                (center_cords[0]+radius, center_cords[1]),        #R
-                (center_cords[0], center_cords[1]-radius),        #T
-                (center_cords[0], center_cords[1]+radius),        #B
-                (center_cords[0]-radius, center_cords[1]-radius), #LT
-                (center_cords[0]+radius, center_cords[1]-radius), #RT
-                (center_cords[0]+radius, center_cords[1]+radius), #RB
-                (center_cords[0]-radius, center_cords[1]+radius)  #LB
+                self.normalize_cords((center_cords[0]-radius, center_cords[1])),        #L
+                self.normalize_cords((center_cords[0]+radius, center_cords[1])),        #R
+                self.normalize_cords((center_cords[0], center_cords[1]-radius)),        #T
+                self.normalize_cords((center_cords[0], center_cords[1]+radius)),        #B
+                self.normalize_cords((center_cords[0]-radius, center_cords[1]-radius)), #LT
+                self.normalize_cords((center_cords[0]+radius, center_cords[1]-radius)), #RT
+                self.normalize_cords((center_cords[0]+radius, center_cords[1]+radius)), #RB
+                self.normalize_cords((center_cords[0]-radius, center_cords[1]+radius))  #LB
             ]
 
     def normalize_cords(self, cords: List[int]) -> List[int]:

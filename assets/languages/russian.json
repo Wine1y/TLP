@@ -25,5 +25,7 @@
     "bury_treasure": "Закопать клад",
     "enter_treasure_amount": "Введите размер клада в SQD",
     "enter_treasure_amount_not_a_number": "Пожалуйста, введите число токенов SDQ, которые вы хотите закопать",
-    "enter_treasure_amount_insufficient_funds": "Недостаточно средств!\nНа вашем балансе %balance% SDQ.\nВведите размер клада в SQD"
+    "enter_treasure_amount_insufficient_funds": "Недостаточно средств!\nНа вашем балансе %balance% SDQ.\nВведите размер клада в SQD",
+    "confirm_pile_move": "Вы действительно хотите подвинуть эту кучу песка на одну клетку?\nЭто потребует затрат энергии в виде 10%.",
+    "pile_move_confirmed": "Подвинуть"
 }

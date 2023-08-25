@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from aiogram.utils.callback_data import CallbackData
 from aiogram.types import (InlineKeyboardMarkup, InlineKeyboardButton,
                            ReplyKeyboardMarkup, KeyboardButton)
@@ -9,7 +9,9 @@ from core.bot.language import BotLanguage
 
 ROVER_MOVE = CallbackData("move", "direction")
 ROVER_DIG = CallbackData("dig", "status")
+ROVER_CANCEL = CallbackData("cancel", "new_message")
 ROVER_REFRESH = CallbackData("refresh", "count")
+ROVER_MOVE_PILE = CallbackData("move_pile", "d_x", "d_y")
 CB_WIP = CallbackData("wip")
 
 def remove_keyboard() -> ReplyKeyboardRemove:
@@ -66,7 +68,7 @@ def dig_confirm(language: BotLanguage) -> InlineKeyboardMarkup:
         ),
         InlineKeyboardButton(
             language.string("cancel"),
-            callback_data=ROVER_DIG.new(status="canceled")
+            callback_data=ROVER_CANCEL.new(new_message="False")
         )
     )
     return markup
@@ -80,7 +82,7 @@ def treasure_found(language: BotLanguage) -> InlineKeyboardMarkup:
         ),
         InlineKeyboardButton(
             language.string("leave_treasure"),
-            callback_data=ROVER_DIG.new(status="canceled")
+            callback_data=ROVER_CANCEL.new(new_message="False")
         )
     )
     return markup
@@ -94,7 +96,7 @@ def treasure_not_found(language: BotLanguage) -> InlineKeyboardMarkup:
         ),
         InlineKeyboardButton(
             language.string("back"),
-            callback_data=ROVER_DIG.new(status="canceled")
+            callback_data=ROVER_CANCEL.new(new_message="False")
         )
     )
     return markup
@@ -104,7 +106,21 @@ def treasure_bury_back(language: BotLanguage) -> InlineKeyboardMarkup:
     markup.add(
         InlineKeyboardButton(
             language.string("back"),
-            callback_data=ROVER_DIG.new(status="canceled_new_message")
+            callback_data=ROVER_CANCEL.new(new_message="True")
+        )
+    )
+    return markup
+
+def pile_move_confirm(language: BotLanguage, move_delta: List[int]) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("pile_move_confirmed"),
+            callback_data=ROVER_MOVE_PILE.new(d_x=move_delta[0], d_y=move_delta[1])
+        ),
+        InlineKeyboardButton(
+            language.string("cancel"),
+            callback_data=ROVER_CANCEL.new(new_message="False")
         )
     )
     return markup

@@ -25,5 +25,7 @@
     "bury_treasure": "Bury treasure",
     "enter_treasure_amount": "Enter treasure amount in SQD",
     "enter_treasure_amount_not_a_number": "Please enter the number of SDQ tokens you wish to bury",
-    "enter_treasure_amount_insufficient_funds": "Insufficient funds!\nYou have %balance% SDQ.\nEnter treasure amount in SQD"
+    "enter_treasure_amount_insufficient_funds": "Insufficient funds!\nYou have %balance% SDQ.\nEnter treasure amount in SQD",
+    "confirm_pile_move": "Are you sure you want to move this sand pile one tile?\nIt will cost you 10% of your energy.",
+    "pile_move_confirmed": "Move"
 }
