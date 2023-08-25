@@ -97,7 +97,7 @@ class SolarDriveBot():
         return rep.commit()
 
     def update_user_energy(self, user: User, rep: UserRepository, new_energy: int) -> bool:
-        user.energy = min(new_energy, 100)
+        user.energy = max(min(new_energy, 100), 0)
         return rep.commit()
     
     async def update_playground_message(
@@ -105,7 +105,8 @@ class SolarDriveBot():
         message: Message,
         user: User,
         caption: Optional[str]=None,
-        markup: Optional[InlineKeyboardMarkup]=None
+        markup: Optional[InlineKeyboardMarkup]=None,
+        parse_mode:str="Markdown"
     ):
         section_image = self.user_subsection(user)
         with self.map_renderer.get_image_data(section_image) as image_data:
@@ -113,7 +114,7 @@ class SolarDriveBot():
                 InputMediaPhoto(
                     InputFile(image_data, filename=f"{user.x}x{user.y}.png"),
                     caption=caption or self.user_controller_info(user),
-                    parse_mode="Markdown"
+                    parse_mode=parse_mode
                 ),
                 reply_markup=markup or markups.rover_controller()
             )

@@ -23,6 +23,14 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
+        if round(user.energy) < 1:
+            await bot.update_playground_message(
+                query.message,
+                user,
+                caption=bot.string(user.language, "insufficient_energy"),
+                markup=markups.insufficient_energy(bot.languages[user.language])
+            )
+            return
         delta = _MOVE_DELTAS[callback_data["direction"]]
         new_cords = bot.bot_map.normalize_cords([user.x+delta[0], user.y+delta[1]])
         if bot.bot_map.tile_at(new_cords[0], new_cords[1]) == MapTile.SandPile:
@@ -168,6 +176,14 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
+        if round(user.energy) < 10:
+            await bot.update_playground_message(
+                query.message,
+                user,
+                caption=bot.string(user.language, "insufficient_energy"),
+                markup=markups.insufficient_energy(bot.languages[user.language])
+            )
+            return
         delta_x, delta_y = int(callback_data["d_x"]), int(callback_data["d_y"])
         pile_pos = bot.bot_map.normalize_cords([user.x+delta_x, user.y+delta_y])
         new_pile_pos = bot.bot_map.normalize_cords([pile_pos[0]+delta_x, pile_pos[1]+delta_y])
@@ -184,6 +200,21 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         user.x, user.y = pile_pos[0], pile_pos[1]
         user_rep.commit()
         await bot.update_playground_message(query.message, user)
+    
+    @bot.dp.callback_query_handler(markups.ROVER_INVITE_FRIENDS.filter())
+    async def inivite_ref_handler(query: CallbackQuery):
+        user_rep = UserRepository()
+        user = user_rep.get_by_tg_id(query.from_user.id)
+        if user is None:
+            await query.answer(bot.string("English", "no_user_error"))
+            return
+        await bot.update_playground_message(
+            query.message,
+            user,
+            caption=bot.string(user.language, "ref_invitation_text"),
+            markup=markups.invitation_back(bot.languages[user.language]),
+            parse_mode=None
+        )
 
     @bot.dp.callback_query_handler(markups.ROVER_REFRESH.filter())
     async def refresh_handler(query: CallbackQuery, callback_data: Dict[str, str]):

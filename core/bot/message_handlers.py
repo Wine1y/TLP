@@ -89,3 +89,27 @@ def set_message_handlers(bot: "SolarDriveBot"):
             await message.reply(f"Пользователь {args[1]} телепортирован")
         else:
             await bot.send_playground_message(user, message.chat.id, rep)
+
+    @bot.dp.message_handler(commands=["energy"])
+    async def cmd_energy(message: types.Message):
+        args = message.text.split(" ")
+        usage = "Использование: /energy (nickname) (new_energy_amount)"
+        if len(args) != 3:
+            await message.reply(usage)
+            return
+        try:
+            energy = float(args[2])
+        except ValueError:
+            await message.reply(usage)
+            return
+        rep = UserRepository()
+        user = rep.get_by_username(args[1])
+        if user is None:
+            await message.reply("Пользователь не найден")
+            return
+        if not bot.update_user_energy(user, rep, energy):
+            await message.reply("Неизвестная ошибка")
+        if user.tg_id != message.from_id:
+            await message.reply(f"Энергия пользователя {args[1]} обновлена")
+        else:
+            await bot.send_playground_message(user, message.chat.id, rep)

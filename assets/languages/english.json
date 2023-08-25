@@ -27,5 +27,8 @@
     "enter_treasure_amount_not_a_number": "Please enter the number of SDQ tokens you wish to bury",
     "enter_treasure_amount_insufficient_funds": "Insufficient funds!\nYou have %balance% SDQ.\nEnter treasure amount in SQD",
     "confirm_pile_move": "Are you sure you want to move this sand pile one tile?\nIt will cost you 10% of your energy.",
-    "pile_move_confirmed": "Move"
+    "pile_move_confirmed": "Move",
+    "insufficient_energy": "❗ You don't have enough energy to complete this action!\nInvite your friends to replenish your energy reserves quickly!\nEach friend you invite will give you 100% charge and 1 SDQ token!",
+    "invite_friends": "Invite friends",
+    "ref_invitation_text": "I would like to invite you to play Solar Drive Quest!\nJourney across a virtual planet, searching for treasures and tokens buried in them! All treasures are encrypted in the blockchain and can only be checked by the participant who is on the desired cell.\nVia my personal link +50 SDQ tokens!\nhttps://t.me/solar_drive_quest_bot"
 }

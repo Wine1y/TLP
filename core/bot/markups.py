@@ -12,6 +12,7 @@ ROVER_DIG = CallbackData("dig", "status")
 ROVER_CANCEL = CallbackData("cancel", "new_message")
 ROVER_REFRESH = CallbackData("refresh", "count")
 ROVER_MOVE_PILE = CallbackData("move_pile", "d_x", "d_y")
+ROVER_INVITE_FRIENDS = CallbackData("invite_ref")
 CB_WIP = CallbackData("wip")
 
 def remove_keyboard() -> ReplyKeyboardRemove:
@@ -120,6 +121,30 @@ def pile_move_confirm(language: BotLanguage, move_delta: List[int]) -> InlineKey
         ),
         InlineKeyboardButton(
             language.string("cancel"),
+            callback_data=ROVER_CANCEL.new(new_message="False")
+        )
+    )
+    return markup
+
+def insufficient_energy(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("invite_friends"),
+            callback_data=ROVER_INVITE_FRIENDS.new()
+        ),
+        InlineKeyboardButton(
+            language.string("back"),
+            callback_data=ROVER_CANCEL.new(new_message="False")
+        )
+    )
+    return markup
+
+def invitation_back(language: BotLanguage) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            language.string("back"),
             callback_data=ROVER_CANCEL.new(new_message="False")
         )
     )
