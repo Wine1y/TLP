@@ -3,6 +3,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Message, InlineKeyboardMarkup, InputMediaPhoto, InputFile
 from typing import List, Dict, Any, Optional
 from PIL import Image
+from datetime import datetime
+from random import uniform
 
 from core.bot.message_handlers import set_message_handlers
 from core.bot import markups
@@ -85,6 +87,20 @@ class SolarDriveBot():
             )
         return True
     
+    def refresh_user_energy(self, user: User, rep: UserRepository) -> bool:
+        now = datetime.utcnow()
+        if user.last_energy_refresh is not None:
+            seconds_passed = (now-datetime.fromtimestamp(user.last_energy_refresh)).seconds
+            energy_charged = 0.1 * seconds_passed * uniform(0.1, 1)
+            print(f"{seconds_passed} seconds passed, + {energy_charged} energy")
+            user.energy = min(round(user.energy+energy_charged), 100)
+        user.last_energy_refresh = round(now.timestamp())
+        return rep.commit()
+
+    def update_user_energy(self, user: User, rep: UserRepository, new_energy: int) -> bool:
+        user.energy = min(new_energy, 100)
+        return rep.commit()
+    
     async def update_playground_message(
         self,
         message: Message,
@@ -111,6 +127,7 @@ class SolarDriveBot():
     ):
         background_image = self.map_renderer.get_map_background(self.section_size, self.section_size)
         section_image = self.user_subsection(user)
+        self.refresh_user_energy(user, user_rep)
         with self.map_renderer.get_image_data(background_image) as image_data:
             new_msg = await self.client.send_photo(
                 caption=self.user_controller_info(user),

@@ -35,6 +35,8 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if not rep.commit():
             await query.answer(bot.string(user.language, "unknown_error"))
             return
+        bot.refresh_user_energy(user, rep)
+        bot.update_user_energy(user, rep, user.energy-1)
         await bot.update_playground_message(query.message, user)
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="waiting"))
@@ -63,11 +65,8 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
-        await query.message.edit_caption(
-            caption=bot.user_controller_info(user),
-            parse_mode="Markdown",
-            reply_markup=markups.rover_controller()
-        )
+        bot.refresh_user_energy(user, rep)
+        await bot.update_playground_message(query.message, user)
     
     @bot.dp.callback_query_handler(markups.ROVER_DIG.filter(status="confirmed"))
     async def dig_confirmed(query: CallbackQuery):
@@ -147,10 +146,12 @@ def set_callback_handlers(bot: "SolarDriveBot"):
             balance_added = await bot.update_user_balance(user, user_rep, user.sdq_balance+treasure.sdq_amount)
             treasure_deleted = treasure_rep.delete(treasure)
             if balance_added and treasure_deleted:
+                bot.refresh_user_energy(user, user_rep)
                 await bot.update_playground_message(query.message, user)
                 return
 
         await query.answer(bot.string(user.language, "unknown_error"))
+        bot.refresh_user_energy(user, user_rep)
         await bot.update_playground_message(query.message, user)
 
     @bot.dp.callback_query_handler(markups.CB_WIP.filter())

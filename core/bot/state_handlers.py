@@ -79,9 +79,9 @@ def set_state_handlers(bot: "SolarDriveBot"):
             bot.string(user_language, "sdq_msg", balance=new_user.sdq_balance),
             reply_markup=markups.sqd_msg_markup(bot.languages[user_language])
         )
+        await sdq_msg.pin()
         if new_user.sdq_msg_id is not None:
             await bot.client.unpin_chat_message(message.chat.id, new_user.sdq_msg_id)
-        await sdq_msg.pin()
         new_user.sdq_msg_id = sdq_msg.message_id
         rep.commit()
         await bot.send_playground_message(new_user, message.chat.id, rep)
