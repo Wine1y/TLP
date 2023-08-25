@@ -49,7 +49,7 @@ class SolarDriveBot():
         self.bot_map = map_generator.BuildMap(map_seed, map_size, map_size)
         self.languages = languages
 
-        self.starting_cords = self.bot_map.closest_walkable(starting_cords)
+        self.starting_cords = starting_cords
         if self.starting_cords is None:
             raise RuntimeError("Can't find any walkable tiles on the map")
 

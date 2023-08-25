@@ -53,12 +53,13 @@ def set_state_handlers(bot: "SolarDriveBot"):
             if rep.commit():
                 new_user = existing_user
         else:
+            starting_cords = bot.bot_map.closest_walkable(bot.starting_cords)
             user = User(
                 username=message.text,
                 tg_id=message.from_id,
                 language=user_language,
-                x=bot.starting_cords[0],
-                y=bot.starting_cords[1],
+                x=starting_cords[0],
+                y=starting_cords[1],
                 sdq_balance=int(getenv("STARTING_BALANCE"))
             )
             if rep.add(user):
