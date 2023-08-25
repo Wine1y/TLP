@@ -125,10 +125,10 @@ class BotMap():
         self.tiles[y][x] = tile
     
     def closest_walkable(self, cords: List[int]) -> Optional[List[int]]:
-        if self.tile_at(cords[0], cords[1]).walkable:
+        rep = UserRepository()
+        if self.is_walkable(cords[0], cords[1], rep):
             return cords
         max_radius = max(self.width-cords[0], self.height-cords[1])
-        rep = UserRepository()
         for radius in range(1, max_radius):
             closest_siblings = self._outlined_square_cords(cords, radius)
             for sibling_cords in closest_siblings:
