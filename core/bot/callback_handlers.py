@@ -23,6 +23,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
+        bot.refresh_user_energy(user, rep)
         if round(user.energy) < 1:
             await bot.update_playground_message(
                 query.message,
@@ -176,6 +177,7 @@ def set_callback_handlers(bot: "SolarDriveBot"):
         if user is None:
             await query.answer(bot.string("English", "no_user_error"))
             return
+        bot.refresh_user_energy(user, user_rep)
         if round(user.energy) < 10:
             await bot.update_playground_message(
                 query.message,

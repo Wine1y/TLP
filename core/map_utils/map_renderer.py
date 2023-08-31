@@ -1,6 +1,6 @@
 from abc import ABC
 from io import IOBase, BytesIO
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from typing import List
 from os import getenv, path
 
@@ -53,6 +53,7 @@ class StaticRenderer(MapRenderer):
         MapTile.GrainySand: Image.open(path.join("assets", "textures", "grainy_sand.png"))
     }
     ROVER_IMAGE = Image.open(path.join("assets", "textures", "rover.png"))
+    FONT = ImageFont.truetype(path.join("assets", "fonts", "Roboto Slab Medium.ttf"))
     
     def get_map_background(self, map_w: int, map_h: int) -> Image.Image:
         return Image.new("RGBA", (map_w*self.TILE_SIZE, map_h*self.TILE_SIZE), (118, 118, 118))
@@ -95,14 +96,15 @@ class StaticRenderer(MapRenderer):
             (tile_x, tile_y),
             self.ROVER_IMAGE
         )
-        text_length = draw.textlength(user.username)
+        text_length = draw.textlength(user.username, font=self.FONT)
         text_x = tile_x+(self.TILE_SIZE-text_length)//2
         text_y = tile_y+self.TILE_SIZE+self.NICKNAME_MARGIN
         draw.text(
             (text_x, text_y),
             user.username,
             anchor="la",
-            fill=self.NICKNAME_COLOR
+            fill=self.NICKNAME_COLOR,
+            font=self.FONT
         )
 
 class StaticDebugRenderer(StaticRenderer):
@@ -127,7 +129,8 @@ class StaticDebugRenderer(StaticRenderer):
             [cords[0]*self.TILE_SIZE+1, cords[1]*self.TILE_SIZE],
             f"{display_cords[0]},{display_cords[1]}",
             anchor="la",
-            fill=(0, 255, 34)
+            fill=(0, 255, 34),
+            font=self.FONT
             )
     
     def _draw_grid(self, draw: ImageDraw.ImageDraw, bot_map: BotMap):

@@ -16,6 +16,7 @@ if __name__ == "__main__":
         map_renderer=StaticRenderer(),
         map_seed=123456789,
         map_size=int(getenv("MAP_SIZE")),
+        energy_coefficient=float(getenv("ENERGY_COEFFICIENT")),
         section_size=int(getenv("SECTION_SIZE")),
         starting_cords=[int(cord) for cord in getenv("STARTING_CORDS").split(",")],
         languages=load_languages(path.join("assets", "languages"))

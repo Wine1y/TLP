@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 from PIL import Image
 from datetime import datetime
 from random import uniform
+from contextlib import suppress
 
 from core.bot.message_handlers import set_message_handlers
 from core.bot import markups
@@ -24,6 +25,7 @@ class SolarDriveBot():
     map_renderer: MapRenderer
     map_seed: int
     map_size: int
+    energy_coefficient: float
     starting_cords: List[int]
     bot_map: BotMap
     languages: Dict[str, BotLanguage]
@@ -35,6 +37,7 @@ class SolarDriveBot():
         map_renderer: MapRenderer,
         map_seed: int,
         map_size: int,
+        energy_coefficient: float,
         section_size: int,
         starting_cords: List[int],
         languages: Dict[str, BotLanguage]
@@ -45,6 +48,7 @@ class SolarDriveBot():
         self.map_renderer = map_renderer
         self.map_seed = map_seed
         self.map_size = map_size
+        self.energy_coefficient = energy_coefficient
         self.section_size = section_size
         self.bot_map = map_generator.BuildMap(map_seed, map_size, map_size)
         self.languages = languages
@@ -88,12 +92,12 @@ class SolarDriveBot():
         return True
     
     def refresh_user_energy(self, user: User, rep: UserRepository) -> bool:
-        now = datetime.utcnow()
+        now = round(datetime.utcnow().timestamp())
         if user.last_energy_refresh is not None:
-            seconds_passed = (now-datetime.fromtimestamp(user.last_energy_refresh)).seconds
-            energy_charged = 0.001 * seconds_passed * uniform(0.1, 1)
+            seconds_passed = now-user.last_energy_refresh
+            energy_charged = self.energy_coefficient * seconds_passed * uniform(0.1, 1)
             user.energy = min(round(user.energy+energy_charged, 4), 100)
-        user.last_energy_refresh = round(now.timestamp())
+        user.last_energy_refresh = now
         return rep.commit()
 
     def update_user_energy(self, user: User, rep: UserRepository, new_energy: int) -> bool:
@@ -148,6 +152,7 @@ class SolarDriveBot():
                 reply_markup=markups.rover_controller()
             )
             if user.playground_msg_id is not None:
-                await self.client.delete_message(chat_id, user.playground_msg_id)
+                with suppress(Exception):
+                    await self.client.delete_message(chat_id, user.playground_msg_id)
             user.playground_msg_id = new_msg.message_id
             user_rep.commit()

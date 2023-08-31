@@ -107,6 +107,7 @@ def set_message_handlers(bot: "SolarDriveBot"):
         if user is None:
             await message.reply("Пользователь не найден")
             return
+        bot.refresh_user_energy(user, rep)
         if not bot.update_user_energy(user, rep, energy):
             await message.reply("Неизвестная ошибка")
         if user.tg_id != message.from_id:
