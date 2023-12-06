@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from io import IOBase, BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from typing import List
@@ -10,9 +10,11 @@ from core.db import User, UserRepository
 
 class MapRenderer(ABC):
 
+    @abstractmethod
     def get_map_background(self, map_w: int, map_h: int) -> Image.Image:
         ...
 
+    @abstractmethod
     def draw_map(self, bot_map: BotMap, draw_players: bool=True) -> Image.Image:
         ...
 
